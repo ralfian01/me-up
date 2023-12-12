@@ -1,0 +1,30 @@
+<?php
+
+/**
+ *---------------------------------------------------------------
+ * ROOT FILE
+ *---------------------------------------------------------------
+ * Set path, autoloader and framework constants
+ */
+
+// Location of class Paths file
+$pathFile = "config/AppConfig/Paths.php";
+
+### Import path configurator
+require_once($pathFile);
+$paths = new AppConfig\Paths();
+
+### Import MVC_ME systemWrapper.php
+require_once($paths->systemDir . DIRECTORY_SEPARATOR . "systemWrapper.php");
+
+// Location of index file
+$indexFile = "public/index.php";
+
+$dirTarget = explode("/", $indexFile);
+array_pop($dirTarget);
+$dirTarget = implode("/", $dirTarget);
+
+$app = new \AppConfig\App();
+$port = !in_array($app->port, ['80', '443']) ? ":{$app->port}" : "";
+
+exec("php -S localhost{$port} -t {$dirTarget} -f {$indexFile}");
