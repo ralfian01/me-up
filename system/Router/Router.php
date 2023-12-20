@@ -2,13 +2,7 @@
 
 namespace MVCME\Router;
 
-// use CodeIgniter\Exceptions\PageNotFoundException;
-// use CodeIgniter\HTTP\Exceptions\RedirectException;
-// use CodeIgniter\Router\Exceptions\RouterException;
-// use AppConfig\App;
-// use Config\Feature;
 use MVCME\Request\HTTPRequest;
-use MVCME\Request\HTTPRequestInterface;
 use Exception;
 use Closure;
 
@@ -21,7 +15,7 @@ class Router
      * A RouteCollection instance
      * @var RoutePack
      */
-    protected $collection;
+    protected $pack;
 
     /**
      * Sub-directory that contains the requested controller class.
@@ -71,22 +65,22 @@ class Router
      * The filter info from Route Collection if the matched route should be filtered.
      * @var string[]
      */
-    protected $filtersInfo = [];
+    protected $middlewareInfo = [];
 
     protected ?AutoRouterInterface $autoRouter = null;
 
     /**
      * Stores a reference to the RouteCollection object.
      */
-    public function __construct(RoutePackInterface $routes, ?HTTPRequestInterface $request = null)
+    public function __construct(RoutePackInterface $routes, ?HTTPRequest $request = null)
     {
-        $this->collection = $routes;
+        $this->pack = $routes;
 
         // These are only for auto-routing
-        $this->controller = $this->collection->getDefaultController();
-        $this->method = $this->collection->getDefaultMethod();
+        $this->controller = $this->pack->getDefaultController();
+        $this->method = $this->pack->getDefaultMethod();
 
-        $this->collection->setHTTPVerb($request->getMethod() ?? $_SERVER['REQUEST_METHOD']);
+        $this->pack->setHTTPVerb($request->getMethod() ?? $_SERVER['REQUEST_METHOD']);
     }
 
     /**
@@ -103,22 +97,14 @@ class Router
         // Decode URL-encoded string
         $uri = urldecode($uri);
 
-        // // Restart filterInfo
-        // $this->filterInfo  = null;
-        // $this->filtersInfo = [];
+        // Restart middlewareInfo
+        $this->middlewareInfo = [];
 
         // Checks defined routes
         if ($this->checkRoutes($uri)) {
 
-            // if ($this->collection->isFiltered($this->matchedRoute[0])) {
-            //     $multipleFiltersEnabled = config(Feature::class)->multipleFilters ?? false;
-            //     if ($multipleFiltersEnabled) {
-            //         $this->filtersInfo = $this->collection->getFiltersForRoute($this->matchedRoute[0]);
-            //     } else {
-            //         // for backward compatibility
-            //         $this->filterInfo = $this->collection->getFilterForRoute($this->matchedRoute[0]);
-            //     }
-            // }
+            if ($this->pack->isFiltered($this->matchedRoute[0]))
+                $this->middlewareInfo = $this->pack->getMiddlewareForRoute($this->matchedRoute[0]);
 
             return $this->controller;
         }
@@ -126,9 +112,9 @@ class Router
         // // Still here? Then we can try to match the URI against
         // // Controllers/directories, but the application may not
         // // want this, like in the case of API's.
-        // if (!$this->collection->shouldAutoRoute()) {
+        // if (!$this->pack->shouldAutoRoute()) {
         //     throw new PageNotFoundException(
-        //         "Can't find a route for '{$this->collection->getHTTPVerb()}: {$uri}'."
+        //         "Can't find a route for '{$this->pack->getHTTPVerb()}: {$uri}'."
         //     );
         // }
 
@@ -139,9 +125,9 @@ class Router
      * Returns the filter info for the matched route, if any
      * @return string[]
      */
-    public function getFilters()
+    public function getMiddleware()
     {
-        return $this->filtersInfo;
+        return $this->middlewareInfo;
     }
 
     /**
@@ -168,7 +154,7 @@ class Router
      */
     public function getDefault404()
     {
-        $route = $this->collection->getDefault404();
+        $route = $this->pack->getDefault404();
 
         if (is_string($route)) {
             $routeArray = explode('::', $route);
@@ -251,7 +237,7 @@ class Router
      */
     protected function checkRoutes(string $uri)
     {
-        $routes = $this->collection->getRoutes($this->collection->getHTTPVerb());
+        $routes = $this->pack->getRoutes($this->pack->getHTTPVerb());
 
         // Don't waste any time
         if (empty($routes))
@@ -271,7 +257,7 @@ class Router
             if (preg_match('#^' . $routeKey . '$#u', $uri, $matches)) {
 
                 // // // Is this route supposed to redirect to another?
-                // // if ($this->collection->isRedirect($routeKey)) {
+                // // if ($this->pack->isRedirect($routeKey)) {
                 // //     // replacing matched route groups with references: post/([0-9]+) -> post/$1
                 // //     $redirectTo = preg_replace_callback('/(\([^\(]+\))/', static function () {
                 // //         static $i = 1;
@@ -281,7 +267,7 @@ class Router
 
                 // //     throw new RedirectException(
                 // //         preg_replace('#^' . $routeKey . '$#u', $redirectTo, $uri),
-                // //         $this->collection->getRedirectCode($routeKey)
+                // //         $this->pack->getRedirectCode($routeKey)
                 // //     );
                 // // }
                 // // // Store our locale so CodeIgniter object can
@@ -294,7 +280,7 @@ class Router
                 // //     );
 
                 // //     if (
-                // //         $this->collection->shouldUseSupportedLocalesOnly()
+                // //         $this->pack->shouldUseSupportedLocalesOnly()
                 // //         && !in_array($matched['locale'], config(App::class)->supportedLocales, true)
                 // //     ) {
                 // //         // Throw exception to prevent the autorouter, if enabled,
@@ -359,7 +345,7 @@ class Router
     public function autoRoute(string $uri)
     {
         [$this->directory, $this->controller, $this->method, $this->params]
-            = $this->autoRouter->getRoute($uri, $this->collection->getHTTPVerb());
+            = $this->autoRouter->getRoute($uri, $this->pack->getHTTPVerb());
     }
 
     /**
@@ -455,6 +441,6 @@ class Router
     {
         $this->matchedRoute = [$route, $handler];
 
-        $this->matchedRouteOptions = $this->collection->getRoutesOptions($route);
+        $this->matchedRouteOptions = $this->pack->getRoutesOptions($route);
     }
 }

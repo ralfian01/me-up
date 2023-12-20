@@ -5,23 +5,12 @@ namespace MVCME;
 use MVCME\Config\App;
 use MVCME\Service\Services;
 use MVCME\Request\HTTPRequest;
+use MVCME\Request\HTTPRequestInterface;
 use MVCME\Response\HTTPResponse;
+use MVCME\Response\HTTPResponseInterface;
 use MVCME\Router\Router;
 use Closure;
-
-
-use CodeIgniter\Exceptions\FrameworkException;
-use CodeIgniter\Exceptions\PageNotFoundException;
-use CodeIgniter\HTTP\DownloadResponse;
-use CodeIgniter\HTTP\Exceptions\RedirectException;
-use CodeIgniter\HTTP\RedirectResponse;
-use CodeIgniter\HTTP\ResponsableInterface;
-use CodeIgniter\Router\RouteCollectionInterface;
-use Config\Feature;
 use Exception;
-use LogicException;
-use MVCME\Request\HTTPRequestInterface;
-use MVCME\Response\HTTPResponseInterface;
 use Throwable;
 
 /**
@@ -83,7 +72,7 @@ class MVCME
      * Whether to enable Control Filters
      * @var bool
      */
-    protected $enableFilters = true;
+    protected $enableMiddleware = true;
 
     /**
      * Constructor
@@ -139,7 +128,7 @@ class MVCME
      */
     protected function getResponseObject()
     {
-        $this->response = Services::response($this->config);
+        $this->response = Services::response();
 
         // Assume success until proven otherwise.
         $this->response->setStatusCode(200);
@@ -154,7 +143,9 @@ class MVCME
         if (!empty($this->path))
             return $this->path;
 
-        return method_exists($this->request, 'getPath') ? $this->request->getPath() : $this->request->getUri()->getPath();
+        return method_exists($this->request, 'getPath')
+            ? $this->request->getPath()
+            : $this->request->getUri()->getPath();
     }
 
     /**
@@ -181,7 +172,7 @@ class MVCME
     }
 
     /**
-     * @return void
+     * @return void|string|array
      */
     protected function filterRoute()
     {
@@ -193,6 +184,8 @@ class MVCME
 
         $this->controller = $this->router->handle($path);
         $this->method = $this->router->methodName();
+
+        return $this->router->getMiddleware();
     }
 
     /**
@@ -203,7 +196,30 @@ class MVCME
     {
         $this->useSecureConnection();
 
-        $this->filterRoute();
+        $filterRoute = $this->filterRoute();
+
+        $uri = $this->determinePath();
+
+        if ($this->enableMiddleware) {
+            $middleware = Services::middleware();
+
+            if ($filterRoute !== null) {
+
+                $middleware->enablemiddleware($filterRoute, 'before');
+                $middleware->enablemiddleware($filterRoute, 'after');
+            }
+
+            // Fire "before" middleware
+            $middlewareResponse = $middleware->fire($uri, 'before');
+
+            if ($middlewareResponse instanceof HTTPResponseInterface) {
+                return $middlewareResponse;
+            }
+
+            if ($middlewareResponse instanceof HTTPRequestInterface) {
+                $this->request = $middlewareResponse;
+            }
+        }
 
         // Start Closure controller
         $returned = $this->startController();
@@ -252,18 +268,14 @@ class MVCME
     /**
      * Fire up the controller, allowing for _remap methods to function
      * @param Controller $class
-     * @return false|HTTPResponse|string|void
+     * @return false|HTTPResponseInterface|string|void
      */
     protected function fireController($class)
     {
         // This is a Web request or PHP CLI request
         $params = $this->router->params();
 
-        $output = method_exists($class, '_remap')
-            ? $class->_remap($this->method, ...$params)
-            : $class->{$this->method}(...$params);
-
-        return $output;
+        return $class->{$this->method}(...$params);
     }
 
     /**
@@ -309,7 +321,13 @@ class MVCME
         try {
             $this->response = $this->handleRequest();
         } catch (Throwable $th) {
-            // code..
+            // Print any exception
+            $trace = Services::traceError($th);
+
+            $this->response
+                ->setContentType('application/json')
+                ->setStatusCode(500)
+                ->setBody(json_encode($trace, JSON_PRETTY_PRINT));
         }
 
         $this->sendResponse();

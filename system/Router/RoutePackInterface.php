@@ -167,12 +167,6 @@ interface RoutePackInterface
     public function options(string $from, $to, ?array $options = null);
 
     /**
-     * Specifies a route that will only display a view.
-     * Only works for GET requests.
-     */
-    public function view(string $from, string $view, ?array $options = null);
-
-    /**
      * Checks a route (using the "from") to see if it's filtered or not.
      */
     public function isFiltered(string $search, ?string $verb = null);
@@ -190,7 +184,7 @@ interface RoutePackInterface
      * @param string $search routeKey
      * @return array<int, string> filter_name or filter_name:arguments like 'role:admin,manager'
      */
-    public function getFiltersForRoute(string $search, ?string $verb = null);
+    public function getMiddlewareForRoute(string $search, ?string $verb = null);
 
     /**
      * Get all controllers in Route Handlers

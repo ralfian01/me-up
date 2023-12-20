@@ -227,4 +227,10 @@ class Message implements MessageInterface
     {
         return $this->headerMap[strtolower($name)] ?? $name;
     }
+
+
+    protected function cors()
+    {
+        // 
+    }
 }

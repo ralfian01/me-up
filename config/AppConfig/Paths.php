@@ -20,7 +20,7 @@ class Paths
     /**
      * App Configuration Directory
      */
-    public string $configDir = __DIR__ . DIRECTORY_SEPARATOR . '..';
+    public string $configDir = __DIR__ . DIRECTORY_SEPARATOR . '../../config';
 
     /**
      * View Directory

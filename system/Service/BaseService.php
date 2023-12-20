@@ -8,7 +8,6 @@ use MVCME\Modules\Modules;
 use MVCME\Config\Autoload;
 use MVCME\Autoloader\Autoloader;
 use MVCME\Autoloader\FileLocator;
-use MVCME\Service\Services as AppServices;
 use MVCME\Service\Services;
 use MVCME\GlobalConstants;
 
@@ -102,77 +101,7 @@ class BaseService
      */
     protected static $discovered = false;
 
-    /**
-     * A cache of other service classes we've found
-     * @var array
-     */
-    protected static $services = [];
-
-    /**
-     * A cache of the names of services classes found
-     * @var array<string>
-     */
-    private static array $serviceNames = [];
-
-    /**
-     * Returns a shared instance of any of the class' services
-     * $key must be a name matching a service
-     * @param array|bool|float|int|object|string|null ...$params
-     * @return object
-     */
-    protected static function getSharedInstance(string $key, ...$params)
-    {
-        $key = strtolower($key);
-
-        // Returns mock if exists
-        if (isset(static::$mocks[$key])) {
-            return static::$mocks[$key];
-        }
-
-        if (!isset(static::$instances[$key])) {
-            // Make sure $getShared is false
-            $params[] = false;
-
-            static::$instances[$key] = AppServices::$key(...$params);
-        }
-
-        return static::$instances[$key];
-    }
-
-    /**
-     * The Autoloader class is the central class that handles our spl_autoload_register method, and helper methods
-     * @return Autoloader
-     */
-    public static function autoloader(bool $getShared = true)
-    {
-        if ($getShared) {
-            if (empty(static::$instances['autoloader'])) {
-                static::$instances['autoloader'] = new Autoloader();
-            }
-
-            return static::$instances['autoloader'];
-        }
-
-        return new Autoloader();
-    }
-
-    /**
-     * The file locator provides utility methods for looking for non-classes
-     * within namespaced folders, as well as convenience methods for loading 'helpers', and 'libraries'
-     * @return FileLocator
-     */
-    public static function locator(bool $getShared = true)
-    {
-        if ($getShared) {
-            if (empty(static::$instances['locator'])) {
-                static::$instances['locator'] = new FileLocator(static::autoloader());
-            }
-
-            return static::$mocks['locator'] ?? static::$instances['locator'];
-        }
-
-        return new FileLocator(static::autoloader());
-    }
+    
 
     /**
      * Provides the ability to perform case-insensitive calling of service names
@@ -180,137 +109,12 @@ class BaseService
      */
     public static function __callStatic(string $name, array $arguments)
     {
-        $service = static::serviceExists($name);
+        $service = self::serviceExists($name);
 
         if ($service === null) {
             return null;
         }
 
         return $service::$name(...$arguments);
-    }
-
-    /**
-     * Check if the requested service is defined and return the declaring
-     * class. Return null if not found.
-     */
-    public static function serviceExists(string $name): ?string
-    {
-        static::buildServicesCache();
-        $services = array_merge(self::$serviceNames, [Services::class]);
-        $name     = strtolower($name);
-
-        foreach ($services as $service) {
-            if (method_exists($service, $name)) {
-                return $service;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Reset shared instances and mocks for testing
-     * @return void
-     */
-    public static function reset(bool $initAutoloader = true)
-    {
-        static::$mocks     = [];
-        static::$instances = [];
-
-        if ($initAutoloader) {
-            static::autoloader()->initialize(new Autoload(), new Modules());
-        }
-    }
-
-    /**
-     * Resets any mock and shared instances for a single service
-     * @return void
-     */
-    public static function resetSingle(string $name)
-    {
-        $name = strtolower($name);
-        unset(static::$mocks[$name], static::$instances[$name]);
-    }
-
-    /**
-     * Inject mock object for testing
-     * @param object $mock
-     * @return void
-     */
-    public static function injectMock(string $name, $mock)
-    {
-        static::$mocks[strtolower($name)] = $mock;
-    }
-
-    /**
-     * Will scan all psr4 namespaces registered with system to look
-     * for new Config\Services files. Caches a copy of each one, then
-     * looks for the service method in each, returning an instance of
-     * the service, if available
-     * @return object|null
-     * @deprecated
-     *
-     * @codeCoverageIgnore
-     */
-    protected static function discoverServices(string $name, array $arguments)
-    {
-        if (!static::$discovered) {
-            if ((new Modules())->shouldDiscover('services')) {
-                $locator = static::locator();
-                $files   = $locator->search('Config/Services');
-
-                if (empty($files)) {
-                    // no files at all found - this would be really, really bad
-                    return null;
-                }
-
-                // Get instances of all service classes and cache them locally.
-                foreach ($files as $file) {
-                    $classname = $locator->getClassname($file);
-
-                    if (!in_array($classname, [Services::class], true)) {
-                        static::$services[] = new $classname();
-                    }
-                }
-            }
-
-            static::$discovered = true;
-        }
-
-        if (!static::$services) {
-            // we found stuff, but no services - this would be really bad
-            return null;
-        }
-
-        // Try to find the desired service method
-        foreach (static::$services as $class) {
-            if (method_exists($class, $name)) {
-                return $class::$name(...$arguments);
-            }
-        }
-
-        return null;
-    }
-
-    protected static function buildServicesCache(): void
-    {
-        if (!static::$discovered) {
-            if ((new Modules())->shouldDiscover('services')) {
-                $locator = static::locator();
-                $files   = $locator->search('Config/Services');
-
-                // Get instances of all service classes and cache them locally.
-                foreach ($files as $file) {
-                    $classname = $locator->getClassname($file);
-
-                    if ($classname !== Services::class) {
-                        self::$serviceNames[] = $classname;
-                        static::$services[]   = new $classname();
-                    }
-                }
-            }
-
-            static::$discovered = true;
-        }
     }
 }

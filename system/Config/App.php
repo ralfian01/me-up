@@ -26,8 +26,7 @@ class App
      * How to use:
      * - "cdn" => "http://cdn.localhost/"
      * - "cdn.dummy" => "http://cdn.dummy/"
-     * - "cdn.localhost:8000" => "http://cdn.localhost:8000/"
-     * - "localhost/cdn" => "http://localhost/cdn/"
+     * - "/cdn" => "http://localhost/cdn/"
      */
     public string $assetHostname = 'cdn';
 
@@ -41,11 +40,11 @@ class App
      * Hostname to your application API
      * 
      * How to use:
-     * - "api" => "http://api.localhost:8080"
-     * - "api.localhost" => "http://api.localhost:8080"
-     * - "api.localhost:8000" => "http://api.localhost:8000"
+     * - "api" => "http://api.localhost/"
+     * - "api.dummy" => "http://api.dummy/"
+     * - "/api" => "http://localhost/api/"
      */
-    public string $apiHostname;
+    public string $apiHostname = 'api';
 
     /**
      * URL to your application API
@@ -58,8 +57,15 @@ class App
      * 
      * How to use:
      * - ["https://yourdomain.com"]
+     * - ["sub"] => "https://sub.yourdomain.com"
+     * - ["sub.domain.com"] => "https://sub.domain.com"
      */
     public array $allowedHostnames = [];
+
+    /**
+     * URLs that is allowed to access the application
+     */
+    public array $allowedURLs = [];
 
     /**
      * The main file to run
@@ -103,7 +109,8 @@ class App
     public function __construct()
     {
         $this->mergeEnv();
-        $this->initialize();
+        $this->initializeURL();
+        $this->initializeAllowedURL();
     }
 
     /**
@@ -115,14 +122,71 @@ class App
 
     /**
      * Initialize app props
+     * @return void
      */
-    private function initialize()
+    private function initializeURL()
     {
         $scheme = $this->secureRequest ? 'https' : 'http';
-        $this->baseURL = "{$scheme}://{$this->hostname}";
+
+        $this->baseURL = "{$scheme}://" . $this->makeBaseURL();
+
+        // Initialize asset URI
+        $assetURL = $this->normalizeURI($this->assetHostname);
+        $this->assetURL = $assetURL;
+
+        // Initialize API URI
+        $apiURL = $this->normalizeURI($this->apiHostname);
+        $this->apiURL = $apiURL;
+    }
+
+    /**
+     * Initialize Allowed URL from allowed hostnames
+     * @return void
+     */
+    private function initializeAllowedURL()
+    {
+        foreach ($this->allowedHostnames as $hostname) {
+
+            $url = $this->normalizeURI($hostname);
+            array_push($this->allowedURLs, "http://{$url}");
+            array_push($this->allowedURLs, "https://{$url}");
+        }
+    }
+
+    /**
+     * Make Base URL from $hostname
+     * @return string
+     */
+    private function makeBaseURL()
+    {
+        $hostname = $this->hostname;
 
         if (!in_array($this->port, $this->ignorePort))
-            $this->baseURL .= ":{$this->port}/";
+            $hostname .= ":{$this->port}";
+
+        return $hostname;
+    }
+
+    /**
+     * Normalize URI
+     * @return string
+     */
+    private function normalizeURI(string $url)
+    {
+        $hostname = $this->hostname;
+
+        if (!in_array($this->port, $this->ignorePort))
+            $hostname .= ":{$this->port}";
+
+        if (preg_match('~^/[A-Za-z_-]+$~', $url)) {
+            return "{$hostname}{$url}";
+        } elseif (preg_match('~^[A-Za-z_-]+\.[A-Za-z_-]+$~', $url)) {
+            return $url;
+        } elseif (preg_match('~^[A-Za-z_-]+$~', $url)) {
+            return "{$url}.{$hostname}";
+        } else {
+            return $url;
+        }
     }
 
     /**

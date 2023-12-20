@@ -43,14 +43,6 @@ class Routing
     public string $defaultMethod = 'index';
 
     /**
-     * Whether to translate dashes in URIs to underscores.
-     * Primarily useful when using the auto-routing.
-     *
-     * Default: false
-     */
-    public bool $translateURIDashes = false;
-
-    /**
      * Sets the class/method that should be called if routing doesn't
      * find a match. It can be either a closure or the controller/method
      * name exactly like a route is defined: Users::index
@@ -65,25 +57,7 @@ class Routing
      * });
      *
      * Example:
-     *  public $override404 = 'App\Errors::show404';
+     *  public $default404 = 'App\Errors::show404';
      */
-    public ?string $override404 = null;
-
-    /**
-     * If TRUE, the system will attempt to match the URI against
-     * Controllers by matching each segment against folders/files
-     * in APPPATH/Controllers, when a match wasn't found against
-     * defined routes.
-     *
-     * If FALSE, will stop searching and do NO automatic routing.
-     */
-    public bool $autoRoute = false;
-
-    /**
-     * If TRUE, will enable the use of the 'prioritize' option
-     * when defining routes.
-     *
-     * Default: false
-     */
-    public bool $prioritize = false;
+    public ?string $default404 = null;
 }

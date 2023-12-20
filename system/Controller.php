@@ -34,12 +34,6 @@ class Controller
     protected int $forceHTTPS = 0;
 
     /**
-     * Once validation has been run, will hold the Validation instance
-     * @var ValidationInterface
-     */
-    protected $validator;
-
-    /**
      * Constructor
      * @return void
      */

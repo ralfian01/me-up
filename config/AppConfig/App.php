@@ -19,17 +19,20 @@ class App extends ConfigApp
     /**
      * URL to your application assets
      */
-    public string $assetHostname = 'cdn';
+    public string $assetHostname = '/pts_cdn';
 
     /**
      * URL to your application API
      */
-    public string $apiHostname = 'api';
+    public string $apiHostname = '/pts_api';
 
     /**
      * Hostname that is allowed to access the application
      */
-    public array $allowedHostnames = [];
+    public array $allowedHostnames = [
+        'api',
+        'cdn'
+    ];
 
     /**
      * The main file to run

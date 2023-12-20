@@ -17,6 +17,14 @@ $paths = new AppConfig\Paths();
 ### Import MVC_ME systemWrapper.php
 require_once($paths->systemDir . DIRECTORY_SEPARATOR . "systemWrapper.php");
 
+// Location of class EnvFile file
+$envFile = SYSTEMPATH . "Config/EnvFile.php";
+
+### Import Environment loader class
+require_once($envFile);
+(new MVCME\Config\EnvFile(ROOTPATH, '.env'))->load();
+
+
 // Location of index file
 $indexFile = "public/index.php";
 

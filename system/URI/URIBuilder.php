@@ -4,7 +4,6 @@ namespace MVCME\URI;
 
 use MVCME\Config\App;
 use MVCME\GlobalConstants;
-use UnexpectedValueException;
 
 /**
  * Creates SiteURI using GlobalConstants.
@@ -15,10 +14,10 @@ final class URIBuilder
     private App $appConfig;
     private GlobalConstants $globalConstants;
 
-    public function __construct(App $appConfig, GlobalConstants $GlobalConstants)
+    public function __construct(App $appConfig, GlobalConstants $globalConstants)
     {
-        $this->appConfig    = $appConfig;
-        $this->globalConstants = $GlobalConstants;
+        $this->appConfig = $appConfig;
+        $this->globalConstants = $globalConstants;
     }
 
     /**
@@ -109,8 +108,8 @@ final class URIBuilder
         // contain the query string (Nginx) a correct URI is found, and also
         // fixes the QUERY_STRING Server var and $_GET array.
         if (trim($path, '/') === '' && strncmp($query, '/', 1) === 0) {
-            $parts    = explode('?', $query, 2);
-            $path     = $parts[0];
+            $parts = explode('?', $query, 2);
+            $path = $parts[0];
             $newQuery = $query[1] ?? '';
 
             $this->globalConstants->setServer('QUERY_STRING', $newQuery);
@@ -132,7 +131,7 @@ final class URIBuilder
      */
     private function parseQueryString()
     {
-        $query = $this->globalConstants->getServer('QUERY_STRING') ?? (string) getenv('QUERY_STRING');
+        $query = $this->globalConstants->getServer('QUERY_STRING');
 
         if (trim($query, '/') === '') {
             return '/';

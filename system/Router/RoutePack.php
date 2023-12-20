@@ -14,11 +14,6 @@ use InvalidArgumentException;
 class RoutePack implements RoutePackInterface
 {
     /**
-     * @var string
-     */
-    protected $httpHost;
-
-    /**
      * The namespace to be added to any Controllers.
      * This must have a trailing backslash (\).
      * @var string
@@ -162,16 +157,19 @@ class RoutePack implements RoutePackInterface
     protected $currentOptions;
 
     /**
-     * A little performance booster
-     * @var bool
+     * The current hostname from $_SERVER['HTTP_HOST']
+     * @var string
      */
-    protected $didDiscover = false;
+    private ?string $httpHost = null;
+
 
     /**
      * Constructor
      */
     public function __construct(Routing $routing)
     {
+        $this->httpHost = Services::request()->getServer('HTTP_HOST');
+
         // Setup based on config file. Let routes file override.
         $this->defaultNamespace = rtrim($routing->defaultNamespace, '\\') . '\\';
         $this->defaultController = $routing->defaultController;
@@ -180,11 +178,9 @@ class RoutePack implements RoutePackInterface
         $this->routeFiles = $routing->routeFiles;
 
         // Normalize the path string in routeFiles array
-        foreach ($this->routeFiles as &$routeFile) {
-            $routeFile = $this->normalizeRouteFiles($routeFile);
+        foreach ($this->routeFiles as $rtKey => &$routeFile) {
+            $this->routeFiles[$rtKey] = $this->normalizeRouteFiles($routeFile);
         }
-
-        return $this;
     }
 
     /**
@@ -235,7 +231,7 @@ class RoutePack implements RoutePackInterface
         $routes = $this;
 
         foreach ($routeFiles as $routeFile) {
-            if (!is_file($routeFile))
+            if (!is_file($routeFile) || !file_exists($routeFile))
                 continue;
 
             require $routeFile;
@@ -412,8 +408,7 @@ class RoutePack implements RoutePackInterface
     }
 
     /**
-     * Group a series of routes under a single URL segment. This is handy
-     * for grouping items into an admin area, like
+     * Group a series of routes under a single URL segment. This is handy for grouping items into an admin area, like
      *
      * @param string $name The name to group/prefix the routes with.
      * @param array|callable ...$params
@@ -421,7 +416,7 @@ class RoutePack implements RoutePackInterface
      */
     public function group(string $name, ...$params)
     {
-        $oldGroup   = $this->group;
+        $oldGroup = $this->group;
         $oldOptions = $this->currentOptions;
 
         // To register a route, we'll set a flag so that our router
@@ -439,7 +434,7 @@ class RoutePack implements RoutePackInterface
             $callback($this);
         }
 
-        $this->group          = $oldGroup;
+        $this->group = $oldGroup;
         $this->currentOptions = $oldOptions;
     }
 
@@ -479,8 +474,7 @@ class RoutePack implements RoutePackInterface
     }
 
     /**
-     * Specifies a route that is only available to POST requests.
-     *
+     * Specifies a route that is only available to POST requests
      * @param array|Closure|string $to
      */
     public function post(string $from, $to, ?array $options = null)
@@ -491,8 +485,7 @@ class RoutePack implements RoutePackInterface
     }
 
     /**
-     * Specifies a route that is only available to PUT requests.
-     *
+     * Specifies a route that is only available to PUT requests
      * @param array|Closure|string $to
      */
     public function put(string $from, $to, ?array $options = null)
@@ -503,8 +496,7 @@ class RoutePack implements RoutePackInterface
     }
 
     /**
-     * Specifies a route that is only available to DELETE requests.
-     *
+     * Specifies a route that is only available to DELETE requests
      * @param array|Closure|string $to
      */
     public function delete(string $from, $to, ?array $options = null)
@@ -515,8 +507,7 @@ class RoutePack implements RoutePackInterface
     }
 
     /**
-     * Specifies a route that is only available to HEAD requests.
-     *
+     * Specifies a route that is only available to HEAD requests
      * @param array|Closure|string $to
      */
     public function head(string $from, $to, ?array $options = null)
@@ -527,8 +518,7 @@ class RoutePack implements RoutePackInterface
     }
 
     /**
-     * Specifies a route that is only available to PATCH requests.
-     *
+     * Specifies a route that is only available to PATCH requests
      * @param array|Closure|string $to
      */
     public function patch(string $from, $to, ?array $options = null)
@@ -539,31 +529,12 @@ class RoutePack implements RoutePackInterface
     }
 
     /**
-     * Specifies a route that is only available to OPTIONS requests.
-     *
+     * Specifies a route that is only available to OPTIONS requests
      * @param array|Closure|string $to
      */
     public function options(string $from, $to, ?array $options = null)
     {
         $this->create('options', $from, $to, $options);
-
-        return $this;
-    }
-
-    /**
-     * Specifies a route that will only display a view.
-     * Only works for GET requests.
-     */
-    public function view(string $from, string $view, ?array $options = null)
-    {
-        $to = static fn (...$data) => Services::renderer()
-            ->setData(['segments' => $data], 'raw')
-            ->render($view, $options);
-
-        $routeOptions = $options ?? [];
-        $routeOptions = array_merge($routeOptions, ['view' => $view]);
-
-        $this->create('get', $from, $to, $routeOptions);
 
         return $this;
     }
@@ -575,7 +546,7 @@ class RoutePack implements RoutePackInterface
     {
         $options = $this->loadRoutesOptions($verb);
 
-        return isset($options[$search]['filter']);
+        return isset($options[$search]['middleware']);
     }
 
     /**
@@ -593,19 +564,19 @@ class RoutePack implements RoutePackInterface
      * @return array<int, string> filter_name or filter_name:arguments like 'role:admin,manager'
      * @phpstan-return list<string>
      */
-    public function getFiltersForRoute(string $search, ?string $verb = null)
+    public function getMiddlewareForRoute(string $search, ?string $verb = null)
     {
         $options = $this->loadRoutesOptions($verb);
 
-        if (!array_key_exists($search, $options) || !array_key_exists('filter', $options[$search])) {
+        if (!array_key_exists($search, $options) || !array_key_exists('middleware', $options[$search])) {
             return [];
         }
 
-        if (is_string($options[$search]['filter'])) {
-            return [$options[$search]['filter']];
+        if (is_string($options[$search]['middleware'])) {
+            return [$options[$search]['middleware']];
         }
 
-        return $options[$search]['filter'];
+        return $options[$search]['middleware'];
     }
 
     /**
@@ -653,7 +624,6 @@ class RoutePack implements RoutePackInterface
      * by a pipe character "|" if there is more than one.
      *
      * @param array|Closure|string $to
-     *
      * @return void
      */
     protected function create(string $verb, string $from, $to, ?array $options = null)
@@ -687,30 +657,12 @@ class RoutePack implements RoutePackInterface
         }
         // Limiting to subdomains?
         elseif (!empty($options['subdomain'])) {
-            // If we don't match the current subdomain, then
-            // we don't need to add the route.
+            // If we don't match the current subdomain, then we don't need to add the route.
             if (!$this->checkSubdomains($options['subdomain'])) {
                 return;
             }
 
             $overwrite = true;
-        }
-
-        // Are we offsetting the binds?
-        // If so, take care of them here in one
-        // fell swoop.
-        if (isset($options['offset']) && is_string($to)) {
-            // Get a constant string to work with.
-            $to = preg_replace('/(\$\d+)/', '$X', $to);
-
-            for ($i = (int) $options['offset'] + 1; $i < (int) $options['offset'] + 7; $i++) {
-                $to = preg_replace_callback(
-                    '/\$X/',
-                    static fn ($m) => '$' . $i,
-                    $to,
-                    1
-                );
-            }
         }
 
         $routeKey = $from;
@@ -726,7 +678,7 @@ class RoutePack implements RoutePackInterface
             // If no namespace found, add the default namespace
             if (strpos($to, '\\') === false || strpos($to, '\\') > 0) {
                 $namespace = $options['namespace'] ?? $this->defaultNamespace;
-                $to        = trim($namespace, '\\') . '\\' . $to;
+                $to = trim($namespace, '\\') . '\\' . $to;
             }
             // Always ensure that we escape our namespace so we're not pointing to
             // \CodeIgniter\Routes\Controller::method.
@@ -746,12 +698,12 @@ class RoutePack implements RoutePackInterface
         }
 
         $this->routes[$verb][$routeKey] = [
-            'name'    => $name,
+            'name' => $name,
             'handler' => $to,
-            'from'    => $from,
+            'from' => $from,
         ];
         $this->routesOptions[$verb][$routeKey] = $options;
-        $this->routesNames[$verb][$name]       = $routeKey;
+        $this->routesNames[$verb][$name] = $routeKey;
 
         // Is this a redirect?
         if (isset($options['redirect']) && is_numeric($options['redirect'])) {

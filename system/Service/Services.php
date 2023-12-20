@@ -14,10 +14,13 @@ use MVCME\Format\Format;
 use MVCME\Router\Router;
 use MVCME\Router\RoutePack;
 use MVCME\Router\RoutePackInterface;
+use MVCME\Middleware\Middleware;
 use MVCME\GlobalConstants;
 use AppConfig\App as AppConfig;
 use AppConfig\Format as FormatConfig;
 use AppConfig\Routing as RoutingConfig;
+use AppConfig\Middleware as MiddlewareConfig;
+use Throwable;
 
 use CodeIgniter\Email\Email;
 use CodeIgniter\Filters\Filters;
@@ -44,20 +47,55 @@ use Config\View as ViewConfig;
 /**
  * Services Configuration file
  */
-class Services extends BaseService
+class Services
 {
+
+    /**
+     * Cache for instance of any services that have been requested as a "shared" instance.
+     * Keys should be lowercase service names.
+     * @var array
+     */
+    protected static $instances = [];
+
+    /**
+     * Returns a shared instance of any of the class' services
+     * $key must be a name matching a service
+     * @param array|bool|float|int|object|string|null ...$params
+     * @return object
+     */
+    protected static function getSharedInstance(string $key, ...$params)
+    {
+        $key = strtolower($key);
+
+        if (!isset(self::$instances[$key])) {
+            // Make sure $getShared is false
+            $params[] = false;
+
+            self::$instances[$key] = self::$key(...$params);
+        }
+
+        return self::$instances[$key];
+    }
+
     /**
      * The URI class provides a way to model and manipulate URIs
      * @param string|null $uri The URI string
+     * @param App|null $config
      * @return URI The current URI if $uri is null
      */
-    public static function uri(?string $uri = null, ?App $config = null)
+    public static function uri(?string $uri = null, $config = null, bool $shared = true)
     {
-        if ($uri === null)
-            return (new URIBuilder(
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__, $uri, $config);
+
+        if ($uri === null) {
+            $uriBuilder = new URIBuilder(
                 $config ?? new AppConfig,
-                new GlobalConstants
-            ))->createFromGlobals();
+                self::globalConstants()
+            );
+
+            return $uriBuilder->createFromGlobals();
+        }
 
         return new URI($uri);
     }
@@ -66,10 +104,13 @@ class Services extends BaseService
      * Returns the current Request object
      * @return HTTPRequestInterface
      */
-    public static function request()
+    public static function request(?URI $uri = null, bool $shared = true)
     {
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__, $uri);
+
         return new HTTPRequest(
-            self::uri()
+            $uri ?? self::uri()
         );
     }
 
@@ -77,8 +118,11 @@ class Services extends BaseService
      * The Response class models an HTTP response
      * @return HTTPResponseInterface
      */
-    public static function response()
+    public static function response(bool $shared = true)
     {
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__);
+
         return new HTTPResponse();
     }
 
@@ -86,8 +130,11 @@ class Services extends BaseService
      * GlobalConstants
      * @return GlobalConstants
      */
-    public static function globalContants(?array $server = null, ?array $get = null)
+    public static function globalConstants(?array $server = null, ?array $get = null, bool $shared = true)
     {
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__, $server, $get);
+
         return new GlobalConstants($server, $get);
     }
 
@@ -95,17 +142,25 @@ class Services extends BaseService
      * The Format class is a convenient place to create Formatters
      * @return Format
      */
-    public static function format(?FormatConfig $config = null)
+    public static function format(?FormatConfig $config = null, bool $shared = true)
     {
-        return new Format($config ?? new FormatConfig);
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__, $config);
+
+        return new Format(
+            $config ?? new FormatConfig
+        );
     }
 
     /**
      * The Routes service is a class that allows for easily building a collection of routes
      * @return RoutePackInterface
      */
-    public static function routes(?Routing $routing = null)
+    public static function routes(?RoutingConfig $routing = null, $shared = true)
     {
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__, $routing);
+
         return new RoutePack(
             $routing ?? new RoutingConfig
         );
@@ -116,12 +171,99 @@ class Services extends BaseService
      * the correct Controller and Method to execute
      * @return Router
      */
-    public static function router(?RoutePack $routes = null, ?HTTPRequest $request = null)
+    public static function router(?RoutePack $routes = null, ?HTTPRequest $request = null, bool $shared = true)
     {
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__, $routes, $request);
+
         return new Router(
             $routes ?? self::routes(),
             $request ?? self::request()
         );
+    }
+
+    /**
+     * Middleware allow you to run tasks before and/or after a controller is executed.
+     * @return Middleware
+     */
+    public static function middleware(?MiddlewareConfig $config = null, bool $shared = true)
+    {
+        if ($shared)
+            return static::getSharedInstance(__FUNCTION__, $config);
+
+        return new Middleware(
+            $config ?? new MiddlewareConfig,
+            self::request(),
+            self::response()
+        );
+    }
+
+    /**
+     * Set header CORS
+     */
+    public static function CORS(?App $config = null)
+    {
+        if ($config == null)
+            $config = new AppConfig();
+
+        $allowedURLs = $config->allowedURLs;
+
+        // if ($_ENV['CI_ENVIRONMENT'] == 'development') {
+
+        //     array_push(
+        //         $origin,
+        //         'http://localhost:' . LOCAL_PORT,
+        //         'http://admin.localhost:' . LOCAL_PORT,
+        //         'http://accounts.localhost:' . LOCAL_PORT,
+        //         'http://pos.localhost:' . LOCAL_PORT
+        //     );
+        // }
+
+        // if (isset($_SERVER['HTTP_ORIGIN'])) {
+
+        //     if (in_array($_SERVER['HTTP_ORIGIN'], $origin)) {
+
+        //         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        //     }
+        // }
+
+        // $header = ['Authorization', 'Content-Type', 'X-Requested-With'];
+
+        // $stringHeader = null;
+
+        // foreach ($header as $key => $value) {
+
+        //     $stringHeader = $stringHeader == null ? $value : $stringHeader . ', ' . $value;
+        // }
+
+        // header('Access-Control-Allow-Headers: ' . $stringHeader);
+        // header('Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, PUT, OPTIONS');
+    }
+
+    /**
+     * Print error trace
+     * @param Throwable $error
+     */
+    public static function traceError(?Throwable $throw)
+    {
+        $error = [
+            'message' => $throw->getMessage(),
+            'trace' => null
+        ];
+
+        // Breakdown trace
+        $parts = explode('#', $throw->getTraceAsString());
+
+        $trace = [];
+        foreach ($parts as $part) {
+            $trace[] = '#' . trim($part);
+        }
+
+        array_shift($trace);
+
+        $error['trace'] = $trace;
+
+        return $error;
     }
 
     // /**
@@ -163,24 +305,6 @@ class Services extends BaseService
     //     }
 
     //     return new Email($config);
-    // }
-
-    // /**
-    //  * Filters allow you to run tasks before and/or after a controller
-    //  * is executed. During before filters, the request can be modified,
-    //  * and actions taken based on the request, while after filters can
-    //  * act on or modify the response itself before it is sent to the client
-    //  * @return Filters
-    //  */
-    // public static function filters(?FiltersConfig $config = null, bool $getShared = true)
-    // {
-    //     if ($getShared) {
-    //         return static::getSharedInstance('filters', $config);
-    //     }
-
-    //     $config ??= config(FiltersConfig::class);
-
-    //     return new Filters($config, self::request(), self::response());
     // }
 
     // /**

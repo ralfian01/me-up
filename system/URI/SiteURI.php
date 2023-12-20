@@ -95,7 +95,7 @@ class SiteURI extends URI
         if ($parts === false)
             throw new UnexpectedValueException("Cannot parse \$url");
 
-        $parts['query']    = $query;
+        $parts['query'] = $query;
         $parts['fragment'] = $fragment;
         $this->applyParts($parts);
 
@@ -110,7 +110,7 @@ class SiteURI extends URI
 
         $routePath = $relativePath === '/' ? '/' : ltrim($parts['path'], '/');
 
-        $query    = $parts['query'] ?? '';
+        $query = $parts['query'] ?? '';
         $fragment = $parts['fragment'] ?? '';
 
         return [$routePath, $query, $fragment];
