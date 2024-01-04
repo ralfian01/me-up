@@ -7,13 +7,12 @@ use MVCME\Files\Exceptions\FileNotFoundException;
 use MVCME\HTTP\Exceptions\HTTPException;
 use MVCME\HTTP\Exceptions\RedirectException;
 use MVCME\HTTP\IncomingRequest;
-use MVCME\HTTP\RedirectResponse;
+use MVCME\Response\RedirectResponse;
 use MVCME\Request\HTTPRequestInterface;
 use MVCME\Response\HTTPResponseInterface;
 use MVCME\URI\URI;
 use Config\App;
 use MVCME\Service\Services;
-use Config\View;
 use MVCME\Request\HTTPRequest;
 
 // Services Convenience Functions
@@ -299,62 +298,10 @@ if (!function_exists('helper')) {
     }
 }
 
-if (!function_exists('lang')) {
-    /**
-     * A convenience method to translate a string or array of them and format
-     * the result with the intl extension's MessageFormatter.
-     *
-     * @return string
-     */
-    function lang(string $line, array $args = [], ?string $locale = null)
-    {
-        $language = Services::language();
-
-        // Get active locale
-        $activeLocale = $language->getLocale();
-
-        if ($locale && $locale !== $activeLocale) {
-            $language->setLocale($locale);
-        }
-
-        $line = $language->getLine($line, $args);
-
-        if ($locale && $locale !== $activeLocale) {
-            // Reset to active locale
-            $language->setLocale($activeLocale);
-        }
-
-        return $line;
-    }
-}
-
-if (!function_exists('redirect')) {
-    /**
-     * Convenience method that works with the current global $request and
-     * $router instances to redirect using named/reverse-routed routes
-     * to determine the URL to go to.
-     *
-     * If more control is needed, you must use $response->redirect explicitly.
-     *
-     * @param string|null $route Route name or Controller::method
-     */
-    function redirect(?string $route = null): RedirectResponse
-    {
-        $response = Services::redirectresponse(null, true);
-
-        if (!empty($route)) {
-            return $response->route($route);
-        }
-
-        return $response;
-    }
-}
-
 if (!function_exists('request')) {
     /**
      * Returns the shared Request.
-     *
-     * @return CLIRequest|IncomingRequest
+     * @return HTTPRequestInterface
      */
     function request()
     {
@@ -365,58 +312,10 @@ if (!function_exists('request')) {
 if (!function_exists('response')) {
     /**
      * Returns the shared Response.
+     * @return HTTPResponseInterface
      */
-    function response(): HTTPResponseInterface
+    function response()
     {
         return Services::response();
-    }
-}
-
-if (!function_exists('route_to')) {
-    /**
-     * Given a route name or controller/method string and any params,
-     * will attempt to build the relative URL to the
-     * matching route.
-     *
-     * NOTE: This requires the controller/method to
-     * have a route defined in the routes Config file.
-     *
-     * @param string     $method    Route name or Controller::method
-     * @param int|string ...$params One or more parameters to be passed to the route.
-     *                              The last parameter allows you to set the locale.
-     *
-     * @return false|string The route (URI path relative to baseURL) or false if not found.
-     */
-    function route_to(string $method, ...$params)
-    {
-        return Services::routes()->reverseRoute($method, ...$params);
-    }
-}
-
-if (!function_exists('view')) {
-    /**
-     * Grabs the current RendererInterface-compatible class
-     * and tells it to render the specified view. Simply provides
-     * a convenience method that can be used in Controllers,
-     * libraries, and routed closures.
-     *
-     * NOTE: Does not provide any escaping of the data, so that must
-     * all be handled manually by the developer.
-     *
-     * @param array $options Options for saveData or third-party extensions.
-     */
-    function view(string $name, array $data = [], array $options = []): string
-    {
-        $renderer = Services::renderer();
-
-        $config   = config(View::class);
-        $saveData = $config->saveData;
-
-        if (array_key_exists('saveData', $options)) {
-            $saveData = (bool) $options['saveData'];
-            unset($options['saveData']);
-        }
-
-        return $renderer->setData($data, 'raw')->render($name, $options, $saveData);
     }
 }

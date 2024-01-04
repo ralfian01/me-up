@@ -46,6 +46,7 @@ use Config\Pager as PagerConfig;
 use Config\Paths;
 use Config\View as ViewConfig;
 use MVCME\HTTP\CORS;
+use MVCME\Response\RedirectResponse;
 
 /**
  * Services Configuration file
@@ -334,36 +335,4 @@ class Services
 
     //     return new Pager($config, $view);
     // }
-
-    // /**
-    //  * The Redirect class provides nice way of working with redirects
-    //  * @return RedirectResponse
-    //  */
-    // public static function redirectresponse(?App $config = null, bool $getShared = true)
-    // {
-    //     if ($getShared) {
-    //         return static::getSharedInstance('redirectresponse', $config);
-    //     }
-
-    //     $config ??= config(App::class);
-    //     $response = new RedirectResponse($config);
-    //     $response->setProtocolVersion(AppServices::request()->getProtocolVersion());
-
-    //     return $response;
-    // }
-
-    // // /**
-    // //  * The Validation class provides tools for validating input data
-    // //  * @return ValidationInterface
-    // //  */
-    // // public static function validation(?ValidationConfig $config = null, bool $getShared = true)
-    // // {
-    // //     if ($getShared) {
-    // //         return static::getSharedInstance('validation', $config);
-    // //     }
-
-    // //     $config ??= config(ValidationConfig::class);
-
-    // //     return new Validation($config, AppServices::renderer());
-    // // }
 }
