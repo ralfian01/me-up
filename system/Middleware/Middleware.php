@@ -5,9 +5,7 @@ namespace MVCME\Middleware;
 use MVCME\Request\HTTPRequest;
 use MVCME\Response\HTTPResponse;
 use MVCME\Config\Middleware as middlewareConfig;
-use MVCME\Services\Services;
 use Exception;
-use BadMethodCallException;
 
 /**
  * Middleware
