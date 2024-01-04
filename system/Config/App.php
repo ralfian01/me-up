@@ -5,14 +5,19 @@ namespace MVCME\Config;
 class App
 {
     /**
-     * Default port of application
+     * @var string Project environment mode
      */
-    public string $port = '8080';
+    public $environment = 'development';
 
     /**
-     * Hostname of application root
+     * @var int|null Default port of application
      */
-    public string $hostname = 'localhost';
+    public $port = 9090;
+
+    /**
+     * @var string Hostname of application root
+     */
+    public $hostname = 'localhost';
 
     /**
      * URL to your application root.
@@ -21,14 +26,14 @@ class App
     public string $baseURL;
 
     /**
-     * Hostname to your application assets
-     * 
      * How to use:
      * - "cdn" => "http://cdn.localhost/"
      * - "cdn.dummy" => "http://cdn.dummy/"
      * - "/cdn" => "http://localhost/cdn/"
+     * 
+     * @var string URL to your application assets
      */
-    public string $assetHostname = 'cdn';
+    public $assetHostname = 'cdn';
 
     /**
      * URL to your application assets
@@ -37,14 +42,14 @@ class App
     public string $assetURL;
 
     /**
-     * Hostname to your application API
-     * 
      * How to use:
      * - "api" => "http://api.localhost/"
      * - "api.dummy" => "http://api.dummy/"
      * - "/api" => "http://localhost/api/"
+     * 
+     * @var string URL to your application API
      */
-    public string $apiHostname = 'api';
+    public $apiHostname = 'api';
 
     /**
      * URL to your application API
@@ -53,14 +58,15 @@ class App
     public string $apiURL;
 
     /**
-     * Hostname that is allowed to access the application
-     * 
      * How to use:
-     * - ["https://yourdomain.com"]
+     * - ["."] => ["https://yourdomain.com"]
      * - ["sub"] => "https://sub.yourdomain.com"
      * - ["sub.domain.com"] => "https://sub.domain.com"
+     * - ["https://specific.domain.com"] => "https://specific.domain.com"
+     * 
+     * @var array Hostname that is allowed to access the application
      */
-    public array $allowedHostnames = [];
+    public $allowedHostnames = [];
 
     /**
      * URLs that is allowed to access the application
@@ -68,33 +74,60 @@ class App
     public array $allowedURLs = [];
 
     /**
-     * The main file to run
+     * @var string The main file to run
      */
-    public string $indexPage = 'index.php';
+    public $indexPage = 'index.php';
 
     /**
-     * Application timezone
-     * 
      * The time zone the app will use.
      * This will affect the timestamp of each request to this application
      * @see https://www.php.net/manual/en/timezones.php for list of timezones supported by PHP.
+     * 
+     * @var string Application timezone
      */
-    public string $timezone = 'UTC';
+    public $timezone = 'UTC';
 
     /**
+     * @var string Charset
+     * 
      * This determines which character set is used by default in various methods
      * that require a character set to be provided
      */
-    public string $charset = 'UTF-8';
+    public $charset = 'UTF-8';
 
     /**
-     * Make every http request done with a secure network
+     * @var array Allowed Headers
      * 
+     * This determines which headers the requester may include
+     */
+    public $allowedHeaders = [
+        'Authorization',
+        'Content-Type',
+        'X-Requested-With'
+    ];
+
+    /**
+     * @var array Allowed HTTP Method
+     * 
+     * This determines which http methods can be included by the requester
+     */
+    public $allowedHTTPMethod = [
+        'GET',
+        'POST',
+        'PATCH',
+        'PUT',
+        'DELETE',
+        'OPTIONS'
+    ];
+
+    /**
      * If true, this will make it mandatory for every request to this application
      * to be made using the HTTPS method. Otherwise, it will cause every request to
      * this application to be made using HTTP and HTTPS methods
+     * 
+     * @var bool Make every http request done with a secure network
      */
-    public bool $secureRequest = false;
+    public $secureRequest = false;
 
     /**
      * Determine which server global should be used to retrieve the URI string.
@@ -147,7 +180,19 @@ class App
     {
         foreach ($this->allowedHostnames as $hostname) {
 
+            if ($hostname == '.') {
+                $url = $this->normalizeURI($this->baseURL);
+                array_push($this->allowedURLs, $this->baseURL);
+                continue;
+            }
+
+            if (preg_match('/^(https?:\/\/[A-Za-z0-9_-]+)/i', $hostname)) {
+                array_push($this->allowedURLs, $hostname);
+                continue;
+            }
+
             $url = $this->normalizeURI($hostname);
+
             array_push($this->allowedURLs, "http://{$url}");
             array_push($this->allowedURLs, "https://{$url}");
         }
@@ -161,7 +206,7 @@ class App
     {
         $hostname = $this->hostname;
 
-        if (!in_array($this->port, $this->ignorePort))
+        if (!empty($this->port) && !in_array($this->port, $this->ignorePort))
             $hostname .= ":{$this->port}";
 
         return $hostname;
@@ -175,14 +220,20 @@ class App
     {
         $hostname = $this->hostname;
 
-        if (!in_array($this->port, $this->ignorePort))
+        if (!empty($this->port) && !in_array($this->port, $this->ignorePort))
             $hostname .= ":{$this->port}";
 
-        if (preg_match('~^/[A-Za-z_-]+$~', $url)) {
+        if (preg_match('/^(https?:\/\/[A-Za-z0-9_-]+)/i', $url)) {
+            // Format: ://<hostname> => http://hostname or https://hostname
+            return $url;
+        } elseif (preg_match('~^/[A-Za-z_-]+$~', $url)) {
+            // Format: /<segment> => hostname/segment
             return "{$hostname}{$url}";
         } elseif (preg_match('~^[A-Za-z_-]+\.[A-Za-z_-]+$~', $url)) {
+            // Format: <sub>.<domain> => sub.custom_domain.com
             return $url;
         } elseif (preg_match('~^[A-Za-z_-]+$~', $url)) {
+            // Format: <sub> => sub.hostname
             return "{$url}.{$hostname}";
         } else {
             return $url;
@@ -196,6 +247,7 @@ class App
      */
     private function mergeEnv()
     {
+        if (isset($_ENV['ENVIRONMENT'])) $this->environment = $_ENV['ENVIRONMENT'];
         if (isset($_ENV['app']['port'])) $this->port = $_ENV['app']['port'];
         if (isset($_ENV['app']['hostname'])) $this->hostname = $_ENV['app']['hostname'];
         if (isset($_ENV['app']['secureRequest'])) $this->secureRequest = $_ENV['app']['secureRequest'];

@@ -3,7 +3,8 @@
 namespace MVCME\Service;
 
 use MVCME\Config\App;
-use MVCME\Config\Routing;
+use MVCME\Config\Assets;
+use MVCME\Asset\Asset;
 use MVCME\URI\URI;
 use MVCME\URI\URIBuilder;
 use MVCME\Request\HTTPRequest;
@@ -20,6 +21,7 @@ use AppConfig\App as AppConfig;
 use AppConfig\Format as FormatConfig;
 use AppConfig\Routing as RoutingConfig;
 use AppConfig\Middleware as MiddlewareConfig;
+use AppConfig\Assets as AssetConfig;
 use Throwable;
 
 use CodeIgniter\Email\Email;
@@ -43,6 +45,7 @@ use Config\Images;
 use Config\Pager as PagerConfig;
 use Config\Paths;
 use Config\View as ViewConfig;
+use MVCME\HTTP\CORS;
 
 /**
  * Services Configuration file
@@ -198,46 +201,34 @@ class Services
         );
     }
 
+
+    /**
+     * @return Asset
+     */
+    public static function assets(?App $config = null, ?Assets $asset = null, ?RoutePackInterface $routes = null, $shared = true)
+    {
+        if ($shared)
+            return static::getSharedInstance(__FUNCTION__, $config, $asset, $routes);
+
+        return new Asset(
+            $config ?? new AppConfig,
+            $asset ?? new AssetConfig,
+            $routes ?? self::routes()
+        );
+    }
+
     /**
      * Set header CORS
      */
-    public static function CORS(?App $config = null)
+    public static function CORS(?App $config = null, ?GlobalConstants $globalConstants = null, $shared = true)
     {
-        if ($config == null)
-            $config = new AppConfig();
+        if ($shared)
+            return static::getSharedInstance(__FUNCTION__, $config, $globalConstants);
 
-        $allowedURLs = $config->allowedURLs;
-
-        // if ($_ENV['CI_ENVIRONMENT'] == 'development') {
-
-        //     array_push(
-        //         $origin,
-        //         'http://localhost:' . LOCAL_PORT,
-        //         'http://admin.localhost:' . LOCAL_PORT,
-        //         'http://accounts.localhost:' . LOCAL_PORT,
-        //         'http://pos.localhost:' . LOCAL_PORT
-        //     );
-        // }
-
-        // if (isset($_SERVER['HTTP_ORIGIN'])) {
-
-        //     if (in_array($_SERVER['HTTP_ORIGIN'], $origin)) {
-
-        //         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-        //     }
-        // }
-
-        // $header = ['Authorization', 'Content-Type', 'X-Requested-With'];
-
-        // $stringHeader = null;
-
-        // foreach ($header as $key => $value) {
-
-        //     $stringHeader = $stringHeader == null ? $value : $stringHeader . ', ' . $value;
-        // }
-
-        // header('Access-Control-Allow-Headers: ' . $stringHeader);
-        // header('Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, PUT, OPTIONS');
+        return new CORS(
+            $config ?? new AppConfig,
+            $globalConstants ?? self::globalConstants()
+        );
     }
 
     /**

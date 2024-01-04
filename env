@@ -10,22 +10,21 @@ ENVIRONMENT = development
 # APP
 #--------------------------------------------------------------------
 
-app.port = 9000
-app.hostname = localhost
-app.secureRequest = false
+app.port            = 9090
+app.hostname        = localhost
+app.secureRequest   = false
 
 
 #--------------------------------------------------------------------
 # DATABASE
 #--------------------------------------------------------------------
 
-# database.default.hostname = localhost
-# database.default.database = mvc_me
-# database.default.username = root
-# database.default.password = 
-# database.default.DBDriver = MySQLi
-# database.default.DBPrefix =
-# database.default.port = 3306
+database.default.hostname   = localhost
+database.default.database   = mvc_me
+database.default.username   = root
+database.default.password   = 
+database.default.driver     = MySQLi
+database.default.port       = 3306
 
 
 #--------------------------------------------------------------------

@@ -1,15 +1,6 @@
 <?php
 
-/**
- * This file is part of CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view
- * the LICENSE file that was distributed with this source code.
- */
-
-namespace CodeIgniter\Database;
+namespace MVCME\Database;
 
 /**
  * Query builder
@@ -87,11 +78,11 @@ class Query implements QueryInterface
      * Pointer to database connection.
      * Mainly for escaping features.
      *
-     * @var ConnectionInterface
+     * @var DBConnectionInterface
      */
     public $db;
 
-    public function __construct(ConnectionInterface $db)
+    public function __construct(DBConnectionInterface $db)
     {
         $this->db = $db;
     }
@@ -109,7 +100,7 @@ class Query implements QueryInterface
         unset($this->swappedQueryString);
 
         if ($binds !== null) {
-            if (! is_array($binds)) {
+            if (!is_array($binds)) {
                 $binds = [$binds];
             }
 
@@ -225,7 +216,7 @@ class Query implements QueryInterface
      */
     public function hasError(): bool
     {
-        return ! empty($this->errorString);
+        return !empty($this->errorString);
     }
 
     /**

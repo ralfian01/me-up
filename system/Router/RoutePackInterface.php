@@ -7,6 +7,12 @@ interface RoutePackInterface
 
     /**
      * Loads main routes file and discover routes
+     * @return void
+     */
+    public function addRoute($routeRule = null);
+
+    /**
+     * Loads main routes file and discover routes
      * @return $this
      */
     public function loadRoutes(?string $routeFile = null);

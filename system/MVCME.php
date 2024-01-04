@@ -176,7 +176,9 @@ class MVCME
      */
     protected function filterRoute()
     {
-        $routes = Services::routes()->loadRoutes();
+        $routes = Services::routes();
+
+        $routes->loadRoutes();
 
         $this->router = Services::router($routes, $this->request);
 
@@ -189,12 +191,25 @@ class MVCME
     }
 
     /**
+     * Initialize route that handle request to application assets
+     * @return void
+     */
+    protected function initializeAssetRoute()
+    {
+        $asset = Services::assets()->loadAsset();
+
+        return $asset;
+    }
+
+    /**
      * Handle requests based on current URI, payload, and http header
      * @return void
      */
     protected function handleRequest()
     {
         $this->useSecureConnection();
+
+        $this->initializeAssetRoute();
 
         $filterRoute = $this->filterRoute();
 
@@ -222,13 +237,13 @@ class MVCME
         }
 
         // Start Closure controller
-        $returned = $this->startController();
+        $returned = $this->initializeController();
 
-        // Closure controller has run in startController().
+        // Closure controller has run in fireController().
         if (!is_callable($this->controller)) {
             $controller = $this->createController();
 
-            if (!method_exists($controller, '_remap') && !is_callable([$controller, $this->method], false)) {
+            if (!is_callable([$controller, $this->method], false)) {
                 throw new Exception("Method {$this->method} not found in controller {$controller}");
             }
 
@@ -242,6 +257,10 @@ class MVCME
         return $this->response;
     }
 
+    /**
+     * Set Response Output
+     * @return string
+     */
     protected function setResponseOutput($returned = null)
     {
         if ($returned instanceof HTTPResponseInterface) {
@@ -284,7 +303,7 @@ class MVCME
      * show the appropriate Page Not Found error
      * @return HTTPResponse|string|void
      */
-    protected function startController()
+    protected function initializeController()
     {
         // Is it routed to a Closure?
         if (is_object($this->controller) && (get_class($this->controller) === 'Closure')) {
@@ -329,6 +348,9 @@ class MVCME
                 ->setStatusCode(500)
                 ->setBody(json_encode($trace, JSON_PRETTY_PRINT));
         }
+
+        // Apply CORS
+        Services::CORS()->applyCors();
 
         $this->sendResponse();
 

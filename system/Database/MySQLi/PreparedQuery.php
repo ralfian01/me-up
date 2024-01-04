@@ -1,19 +1,10 @@
 <?php
 
-/**
- * This file is part of CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view
- * the LICENSE file that was distributed with this source code.
- */
+namespace MVCME\Database\MySQLi;
 
-namespace CodeIgniter\Database\MySQLi;
-
+use MVCME\Database\DBPreparedQuery;
 use BadMethodCallException;
-use CodeIgniter\Database\BasePreparedQuery;
-use CodeIgniter\Database\Exceptions\DatabaseException;
+use Exception;
 use mysqli;
 use mysqli_result;
 use mysqli_sql_exception;
@@ -21,10 +12,8 @@ use mysqli_stmt;
 
 /**
  * Prepared query for MySQLi
- *
- * @extends BasePreparedQuery<mysqli, mysqli_stmt, mysqli_result>
  */
-class PreparedQuery extends BasePreparedQuery
+class PreparedQuery extends DBPreparedQuery
 {
     /**
      * Prepares the query against the database, and saves the connection
@@ -42,12 +31,12 @@ class PreparedQuery extends BasePreparedQuery
         // with terminating semicolons.
         $sql = rtrim($sql, ';');
 
-        if (! $this->statement = $this->db->mysqli->prepare($sql)) {
+        if (!$this->statement = $this->db->mysqli->prepare($sql)) {
             $this->errorCode   = $this->db->mysqli->errno;
             $this->errorString = $this->db->mysqli->error;
 
             if ($this->db->DBDebug) {
-                throw new DatabaseException($this->errorString . ' code: ' . $this->errorCode);
+                throw new Exception($this->errorString . ' code: ' . $this->errorCode);
             }
         }
 
@@ -60,7 +49,7 @@ class PreparedQuery extends BasePreparedQuery
      */
     public function _execute(array $data): bool
     {
-        if (! isset($this->statement)) {
+        if (!isset($this->statement)) {
             throw new BadMethodCallException('You must call prepare before trying to execute a prepared statement.');
         }
 
@@ -85,7 +74,7 @@ class PreparedQuery extends BasePreparedQuery
             return $this->statement->execute();
         } catch (mysqli_sql_exception $e) {
             if ($this->db->DBDebug) {
-                throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
+                throw new Exception($e->getMessage(), $e->getCode(), $e);
             }
 
             return false;

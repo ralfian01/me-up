@@ -1,36 +1,24 @@
 <?php
 
-/**
- * This file is part of CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view
- * the LICENSE file that was distributed with this source code.
- */
+namespace MVCME\Database\MySQLi;
 
-namespace CodeIgniter\Database\MySQLi;
-
-use CodeIgniter\Database\BaseBuilder;
-use CodeIgniter\Database\Exceptions\DatabaseException;
-use CodeIgniter\Database\RawSql;
+use MVCME\Database\DBBuilder;
+use MVCME\Database\RawSql;
+use Exception;
 
 /**
  * Builder for MySQLi
  */
-class Builder extends BaseBuilder
+class Builder extends DBBuilder
 {
     /**
      * Identifier escape character
-     *
      * @var string
      */
     protected $escapeChar = '`';
 
     /**
-     * Specifies which sql statements
-     * support the ignore option.
-     *
+     * Specifies which sql statements support the ignore option.
      * @var array
      */
     protected $supportedIgnoreStatements = [
@@ -41,15 +29,13 @@ class Builder extends BaseBuilder
 
     /**
      * FROM tables
-     *
-     * Groups tables in FROM clauses if needed, so there is no confusion
-     * about operator precedence.
-     *
+     * Groups tables in FROM clauses if needed, so there is no confusion about operator precedence. 
      * Note: This is only used (and overridden) by MySQL.
+     * @return string
      */
-    protected function _fromTables(): string
+    protected function _fromTables()
     {
-        if (! empty($this->QBJoin) && count($this->QBFrom) > 1) {
+        if (!empty($this->QBJoin) && count($this->QBFrom) > 1) {
             return '(' . implode(', ', $this->QBFrom) . ')';
         }
 
@@ -58,8 +44,9 @@ class Builder extends BaseBuilder
 
     /**
      * Generates a platform-specific batch update string from the supplied data
+     * @return string
      */
-    protected function _updateBatch(string $table, array $keys, array $values): string
+    protected function _updateBatch(string $table, array $keys, array $values)
     {
         $sql = $this->QBOptions['sql'] ?? '';
 
@@ -69,10 +56,10 @@ class Builder extends BaseBuilder
 
             if ($constraints === []) {
                 if ($this->db->DBDebug) {
-                    throw new DatabaseException('You must specify a constraint to match on for batch updates.'); // @codeCoverageIgnore
+                    throw new Exception("You must specify a constraint to match on for batch updates.");
                 }
 
-                return ''; // @codeCoverageIgnore
+                return '';
             }
 
             $updateFields = $this->QBOptions['updateFields'] ??
@@ -94,8 +81,7 @@ class Builder extends BaseBuilder
                         ($value instanceof RawSql && is_string($key))
                         ?
                         $table . '.' . $key . ' = ' . $value
-                        :
-                        (
+                        : (
                             $value instanceof RawSql
                             ?
                             $value

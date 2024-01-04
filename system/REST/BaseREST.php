@@ -2,6 +2,7 @@
 
 namespace MVCME\REST;
 
+use AppConfig\REST;
 use MVCME\Controller;
 use MVCME\Request\HTTPRequestInterface;
 use MVCME\Response\HTTPResponseInterface;
@@ -123,8 +124,9 @@ class BaseREST extends Controller
             if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $this->validOrigin))
                 $json['report_id'] = $report_id;
         }
+
         // Apply CORS
-        Services::CORS();
+        Services::CORS(new REST)->applyCors();
 
         if (!$this->directCall) {
 
@@ -166,13 +168,13 @@ class BaseREST extends Controller
         $data = is_array($data_or_code) ? $data_or_code : $data;
 
         // Apply CORS
-        Services::CORS();
+        Services::CORS(new REST)->applyCors();
 
         if (!$this->directCall) {
 
             return $this->response
                 ->setContentType('application/json')
-                ->setStatusCode(200)
+                ->setStatusCode($code)
                 ->setBody(json_encode(
                     [
                         'code' => $code,
@@ -198,7 +200,7 @@ class BaseREST extends Controller
         // If request payload is json
         if ($this->request->is('json')) return $this->request->getJSON(true);
 
-        $contentType = $this->request->header('content-type');
+        $contentType = $this->request->getHeaderLine('content-type');
         $requestMethod = strtoupper($this->request->getServer('REQUEST_METHOD'));
 
         switch ($requestMethod) {
@@ -244,7 +246,7 @@ class BaseREST extends Controller
     public function getFile(string $fileName = null)
     {
 
-        $contentType = $this->request->header('content-type');
+        $contentType = $this->request->getHeaderLine('content-type');
         $requestMethod = strtoupper($this->request->getServer('REQUEST_METHOD'));
 
         if (strpos($contentType, 'form-data') >= 1) {

@@ -5,6 +5,9 @@ namespace App\REST\V1;
 class Home extends BaseRESTV1
 {
 
+    /**
+     * @var object|null Database Repository
+     */
     private $dbRepo;
 
     public function __construct(
@@ -27,7 +30,7 @@ class Home extends BaseRESTV1
     ];
 
     /* Edit this line to set authority rules */
-    protected $authorityRules = [];
+    protected $privilegeRules = [];
 
     protected function mainActivity($id = null)
     {
@@ -39,7 +42,7 @@ class Home extends BaseRESTV1
     private function nextValidation()
     {
         return $this->respond([
-            "name" => '123'
+            "text" => 'hello world'
         ]);
     }
 }

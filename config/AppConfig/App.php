@@ -7,56 +7,83 @@ use MVCME\Config\App as ConfigApp;
 class App extends ConfigApp
 {
     /**
-     * Default port of application
+     * @var string Project environment mode
      */
-    public string $port = '9000';
+    public $environment = 'development';
 
     /**
-     * Hostname of application root
+     * @var int|null Default port of application
      */
-    public string $hostname = 'localhost';
+    public $port = 9090;
 
     /**
-     * URL to your application assets
+     * @var string Hostname of application root
      */
-    public string $assetHostname = '/pts_cdn';
+    public $hostname = 'localhost';
 
     /**
-     * URL to your application API
+     * @var string URL to your application assets
      */
-    public string $apiHostname = '/pts_api';
+    public $assetHostname = '/pts_cdn';
 
     /**
-     * Hostname that is allowed to access the application
+     * @var string URL to your application API
      */
-    public array $allowedHostnames = [
+    public $apiHostname = '/pts_api';
+
+    /**
+     * @var array Hostname that is allowed to access the application
+     */
+    public $allowedHostnames = [
         'api',
         'cdn'
     ];
 
     /**
-     * The main file to run
+     * @var string The main file to run
      */
-    public string $indexPage = 'index.php';
+    public $indexPage = 'index.php';
 
     /**
-     * Application timezone
+     * @var string Application timezone
      */
-    public string $timezone = 'UTC';
+    public $timezone = 'UTC';
 
     /**
+     * @var string Charset
+     * 
      * This determines which character set is used by default in various methods
      * that require a character set to be provided
      */
-    public string $charset = 'UTF-8';
+    public $charset = 'UTF-8';
 
     /**
-     * Make every http request done with a secure network
+     * @var array Allowed Headers
+     * 
+     * This determines which headers the requester may include
      */
-    public bool $secureRequest = false;
+    public $allowedHeaders = [
+        'Authorization',
+        'Content-Type',
+        'X-Requested-With'
+    ];
 
     /**
-     * Determine which server global should be used to retrieve the URI string
+     * @var array Allowed HTTP Method
+     * 
+     * This determines which http methods can be included by the requester
      */
-    public string $uriProtocol = 'REQUEST_URI';
+    public $allowedHTTPMethod = [
+        'GET',
+        'POST',
+        'PATCH',
+        'PUT',
+        'DELETE',
+        'OPTIONS'
+    ];
+
+    /**
+     * @var bool Make every http request done with a secure network
+     */
+    public $secureRequest = false;
 }

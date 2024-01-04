@@ -1,17 +1,8 @@
 <?php
 
-/**
- * This file is part of CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view
- * the LICENSE file that was distributed with this source code.
- */
+namespace MVCME\Database\MySQLi;
 
-namespace CodeIgniter\Database\MySQLi;
-
-use CodeIgniter\Database\BaseResult;
+use MVCME\Database\DBResult;
 use CodeIgniter\Entity\Entity;
 use mysqli;
 use mysqli_result;
@@ -19,10 +10,8 @@ use stdClass;
 
 /**
  * Result for MySQLi
- *
- * @extends BaseResult<mysqli, mysqli_result>
  */
-class Result extends BaseResult
+class Result extends DBResult
 {
     /**
      * Gets the number of fields in the result set.
@@ -159,7 +148,7 @@ class Result extends BaseResult
      */
     public function getNumRows(): int
     {
-        if (! is_int($this->numRows)) {
+        if (!is_int($this->numRows)) {
             $this->numRows = $this->resultID->num_rows;
         }
 

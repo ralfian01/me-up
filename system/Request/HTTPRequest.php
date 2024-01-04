@@ -57,6 +57,7 @@ class HTTPRequest extends Message implements HTTPRequestInterface
             $body = file_get_contents('php://input');
         }
 
+        $this->uri = $uri;
         $this->path = $uri instanceof SiteURI ? $uri->getRoutePath() : $uri->getPath();
         $this->method = $this->getServer('REQUEST_METHOD') ?? 'GET';
     }

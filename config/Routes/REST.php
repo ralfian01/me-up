@@ -9,4 +9,4 @@ use App\REST\V1 as RESTV1;
  * ---------------------------------------------------
  */
 
-REST::get('/', [RESTV1\Home::class, 'index'], ['middleware' => 'auth/basic']);
+REST::get('/', [RESTV1\Home::class, 'index']);

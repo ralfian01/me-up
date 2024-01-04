@@ -7,6 +7,7 @@ use MVCME\Service\Services;
 use Closure;
 use Exception;
 use InvalidArgumentException;
+use MVCME\Asset\AssetController;
 
 /**
  * 
@@ -42,6 +43,11 @@ class RoutePack implements RoutePackInterface
      * An array of files that would contain route definitions.
      */
     protected array $routeFiles = [];
+
+    /**
+     * Additional route rules
+     */
+    protected $routeRules;
 
     /**
      * Defined placeholders that can be used within the
@@ -208,6 +214,15 @@ class RoutePack implements RoutePackInterface
         }
 
         return implode('.', $paths);
+    }
+
+    /**
+     * Add route file
+     * @return void
+     */
+    public function addRoute($routeRule = null)
+    {
+        return $this->routeRules = $routeRule;
     }
 
     /**

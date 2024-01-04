@@ -2,9 +2,10 @@
 
 namespace MVCME\Request;
 
+use MVCME\Message\MessageInterface;
 use MVCME\URI\URI;
 
-interface HTTPRequestInterface
+interface HTTPRequestInterface extends MessageInterface
 {
 
     /**

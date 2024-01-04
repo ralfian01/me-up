@@ -19,7 +19,7 @@ class Routing extends BaseRouting
     public array $routeFiles = [
         CONFIGPATH . 'AppConfig/Routes.php',
         ROUTESPATH . 'REST.php',
-        ROUTESPATH . 'Web.php',
+        ROUTESPATH . 'Web.php'
     ];
 
     /**

@@ -1,42 +1,24 @@
 <?php
 
-/**
- * This file is part of CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view
- * the LICENSE file that was distributed with this source code.
- */
-
-namespace CodeIgniter\Database;
+namespace MVCME\Database;
 
 use InvalidArgumentException;
 
 /**
- * Database Connection Factory
- *
+ * Database Connection.
  * Creates and returns an instance of the appropriate Database Connection.
  */
 class Database
 {
     /**
-     * Maintains an array of the instances of all connections that have
-     * been created.
-     *
-     * Helps to keep track of all open connections for performance
-     * monitoring, logging, etc.
-     *
+     * Maintains an array of the instances of all connections that have been created.     *
      * @var array
      */
     protected $connections = [];
 
     /**
      * Parses the connection binds and creates a Database Connection instance.
-     *
      * @return BaseConnection
-     *
-     * @throws InvalidArgumentException
      */
     public function load(array $params = [], string $alias = '')
     {
@@ -44,7 +26,7 @@ class Database
             throw new InvalidArgumentException('You must supply the parameter: alias.');
         }
 
-        if (! empty($params['DSN']) && strpos($params['DSN'], '://') !== false) {
+        if (!empty($params['DSN']) && strpos($params['DSN'], '://') !== false) {
             $params = $this->parseDSN($params);
         }
 
@@ -58,23 +40,12 @@ class Database
     }
 
     /**
-     * Creates a Forge instance for the current database type.
-     */
-    public function loadForge(ConnectionInterface $db): Forge
-    {
-        if (! $db->connID) {
-            $db->initialize();
-        }
-
-        return $this->initDriver($db->DBDriver, 'Forge', $db);
-    }
-
-    /**
      * Creates an instance of Utils for the current database type.
+     * @return BaseUtils
      */
-    public function loadUtils(ConnectionInterface $db): BaseUtils
+    public function loadUtils(DBConnectionInterface $db)
     {
-        if (! $db->connID) {
+        if (!$db->connID) {
             $db->initialize();
         }
 
@@ -83,28 +54,27 @@ class Database
 
     /**
      * Parses universal DSN string
-     *
      * @throws InvalidArgumentException
      */
     protected function parseDSN(array $params): array
     {
         $dsn = parse_url($params['DSN']);
 
-        if (! $dsn) {
+        if (!$dsn) {
             throw new InvalidArgumentException('Your DSN connection string is invalid.');
         }
 
         $dsnParams = [
-            'DSN'      => '',
+            'DSN' => '',
             'DBDriver' => $dsn['scheme'],
             'hostname' => isset($dsn['host']) ? rawurldecode($dsn['host']) : '',
-            'port'     => isset($dsn['port']) ? rawurldecode((string) $dsn['port']) : '',
+            'port' => isset($dsn['port']) ? rawurldecode((string) $dsn['port']) : '',
             'username' => isset($dsn['user']) ? rawurldecode($dsn['user']) : '',
             'password' => isset($dsn['pass']) ? rawurldecode($dsn['pass']) : '',
             'database' => isset($dsn['path']) ? rawurldecode(substr($dsn['path'], 1)) : '',
         ];
 
-        if (! empty($dsn['query'])) {
+        if (!empty($dsn['query'])) {
             parse_str($dsn['query'], $extra);
 
             foreach ($extra as $key => $val) {
@@ -120,18 +90,16 @@ class Database
     }
 
     /**
-     * Creates a database object.
-     *
-     * @param string       $driver   Driver name. FQCN can be used.
-     * @param string       $class    'Connection'|'Forge'|'Utils'
+     * Creates a database object
+     * @param string $driver Driver name
+     * @param string $class 'Connection'|'Forge'|'Utils'
      * @param array|object $argument The constructor parameter.
-     *
      * @return BaseConnection|BaseUtils|Forge
      */
-    protected function initDriver(string $driver, string $class, $argument): object
+    protected function initDriver(string $driver, string $class, $argument)
     {
         $classname = (strpos($driver, '\\') === false)
-            ? "CodeIgniter\\Database\\{$driver}\\{$class}"
+            ? "MVCME\\Database\\{$driver}\\{$class}"
             : $driver . '\\' . $class;
 
         return new $classname($argument);

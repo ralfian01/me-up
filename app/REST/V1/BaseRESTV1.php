@@ -6,37 +6,37 @@ use Exception;
 use MVCME\REST\BaseREST;
 use MVCME\Request\Payload;
 
-class BaseRESTV1 extends BaseREST
+class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
 {
     /**
-     * @var array $auth Property that contains the authentication data
+     * @var array Property that contains the authentication data
      */
     public $auth = [];
 
     /**
-     * @var array $authorityRules Property that contains the authority data
-     */
-    protected $authorityRules = [];
-
-    /**
-     * @var array $payload Property that contains the payload data in non file form
+     * @var array Property that contains the payload data in non file form
      */
     public $payload = [];
 
     /**
-     * @var array|Payload $payloadRules Property that contains the payload rules
+     * @var array Property that contains the privilege data
+     */
+    protected $privilegeRules = [];
+
+    /**
+     * @var array|Payload Property that contains the payload rules
      * (Please read the Payload class documentation for more information)
      */
     protected $payloadRules = [];
 
     /**
-     * @var array|object $file Property that contain payload data in file form
+     * @var array|object Property that contain payload data in file form
      */
     protected $file = [];
 
     /**
      * Default function if client unauthorized
-     * @return void
+     * @return void|string
      */
     private function __unauthorizedScheme()
     {
@@ -44,15 +44,17 @@ class BaseRESTV1 extends BaseREST
     }
 
     /**
-     * Main activity     
+     * Main activity
+     * @return null
      */
     protected function mainActivity()
     {
+        return null;
     }
 
     /** 
-     * Index method that called from Routes.php
-     * @return void
+     * The main method called by routes
+     * @return object|string
      */
     public function index()
     {
@@ -68,7 +70,7 @@ class BaseRESTV1 extends BaseREST
         if (isset($this->auth['authority'])) {
 
             // // Check account authority
-            if (!$this->checkAuthorization($this->auth['authority']))
+            if (!$this->checkPrivilege($this->auth['authority']))
                 return $this->__unauthorizedScheme();
         }
 
@@ -116,14 +118,14 @@ class BaseRESTV1 extends BaseREST
      * Function to check account authorization
      * @return boolean
      */
-    private function checkAuthorization($authority)
+    private function checkPrivilege($authority)
     {
         $validCount = 0;
-        foreach ($this->authorityRules as $key => $value) {
+        foreach ($this->privilegeRules as $key => $value) {
             if (in_array($value, $authority)) $validCount++;
         }
 
-        return $validCount >= count($this->authorityRules);
+        return $validCount >= count($this->privilegeRules);
     }
 
     /** 
