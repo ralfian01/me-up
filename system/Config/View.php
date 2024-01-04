@@ -15,9 +15,6 @@ use CodeIgniter\View\ViewDecoratorInterface;
 
 /**
  * View configuration
- *
- * @phpstan-type ParserCallable (callable(mixed): mixed)
- * @phpstan-type ParserCallableString (callable(mixed): mixed)&string
  */
 class View extends BaseConfig
 {

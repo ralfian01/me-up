@@ -295,11 +295,15 @@ class RoutePack implements RoutePackInterface
      * Sets the class/method that should be called if routing doesn't
      * find a match. It can be either a closure or the controller/method
      * name exactly like a route is defined: Users::index
-     * @param callable|string|null $callable
+     * @param callable|string|null|array $callable
      * @return $this
      */
     public function setDefault404($callable = null)
     {
+        if (is_array($callable) && count($callable) >= 2) {
+            $callable = "\\{$callable[0]}::{$callable[1]}";
+        }
+
         $this->default404 = $callable;
 
         return $this;

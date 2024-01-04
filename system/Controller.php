@@ -4,6 +4,7 @@ namespace MVCME;
 
 use MVCME\Request\HTTPRequestInterface;
 use MVCME\Response\HTTPResponseInterface;
+use MVCME\View\BaseView;
 
 /**
  * Class Controller
@@ -15,6 +16,12 @@ class Controller
      * @var array
      */
     protected $helpers = [];
+
+    /**
+     * Helpers that will be automatically loaded on class instantiation
+     * @var string
+     */
+    protected $baseViewPath;
 
     /**
      * Instance of the main Request object
@@ -47,6 +54,18 @@ class Controller
 
         // // Autoload helper files.
         // helper($this->helpers);
+    }
+
+
+    /**
+     * Render HTML View
+     * @return string
+     */
+    protected function view(string $path, ?array $data = null)
+    {
+        $renderer = new BaseView($this->baseViewPath);
+
+        return $renderer->setData($data ?? [])->render($path);
     }
 
     /**

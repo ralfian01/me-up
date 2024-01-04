@@ -6,6 +6,6 @@ class Home extends BaseWeb
 {
     public function index()
     {
-        return "Welcome";
+        return $this->view("welcome_message");
     }
 }

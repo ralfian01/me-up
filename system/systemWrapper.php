@@ -43,7 +43,7 @@ if (!defined('APP_NAMESPACE'))
     require(CONFIGPATH . "AppConfig/Constants.php");
 
 // Temporary
-require_once(SYSTEMPATH . "Common.php");
+// require_once(SYSTEMPATH . "Common.php");
 
 
 /*

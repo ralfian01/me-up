@@ -11,6 +11,7 @@ use MVCME\Response\HTTPResponseInterface;
 use MVCME\Router\Router;
 use Closure;
 use Exception;
+use MVCME\Exceptions\PageNotFoundException;
 use Throwable;
 
 /**
@@ -319,7 +320,7 @@ class MVCME
 
         // Try to autoload the class
         if (!class_exists($this->controller, true) || $this->method[0] === '_') {
-            throw new Exception("Cannot found controller {$this->controller} or {$this->method[0]}");
+            throw new PageNotFoundException("Cannot found controller {$this->controller} or {$this->method}");
         }
     }
 
@@ -339,6 +340,8 @@ class MVCME
         // Start routing
         try {
             $this->response = $this->handleRequest();
+        } catch (PageNotFoundException $ntFound) {
+            $this->display404errors($ntFound);
         } catch (Throwable $th) {
             // Print any exception
             $trace = Services::traceError($th);
@@ -353,66 +356,37 @@ class MVCME
         Services::CORS()->applyCors();
 
         $this->sendResponse();
-
-        // try {
-        //     $this->response = $this->handleRequest($routes, config(Cache::class), $returnResponse);
-        // } catch (ResponsableInterface | DeprecatedRedirectException $e) {
-        //     $this->outputBufferingEnd();
-        //     if ($e instanceof DeprecatedRedirectException) {
-        //         $e = new RedirectException($e->getMessage(), $e->getCode(), $e);
-        //     }
-
-        //     $this->response = $e->getResponse();
-        // } catch (PageNotFoundException $e) {
-        //     $this->response = $this->display404errors($e);
-        // } catch (Throwable $e) {
-        //     $this->outputBufferingEnd();
-
-        //     throw $e;
-        // }
     }
 
-    // /**
-    //  * Displays a 404 Page Not Found error. If set, will try to
-    //  * call the 404Override controller/method that was set in routing config.
-    //  *
-    //  * @return HTTPResponse|void
-    //  */
-    // protected function display404errors(PageNotFoundException $e)
-    // {
-    //     // Is there a 404 Override available?
-    //     if ($override = $this->router->get404Override()) {
-    //         $returned = null;
+    /**
+     * Displays a 404 Page Not Found error. If set, will try to
+     * call the 404Override controller/method that was set in routing config.
+     * @return HTTPResponse|void
+     */
+    protected function display404errors(PageNotFoundException $e)
+    {
+        // Is there a 404 Override available?
+        if ($override = $this->router->getDefault404()) {
+            $returned = null;
 
-    //         if ($override instanceof Closure) {
-    //             echo $override($e->getMessage());
-    //         } elseif (is_array($override)) {
-    //             $this->benchmark->start('controller');
-    //             $this->benchmark->start('controller_constructor');
+            if ($override instanceof Closure) {
+                echo $override($e->getMessage());
+            } elseif (is_array($override)) {
 
-    //             $this->controller = $override[0];
-    //             $this->method     = $override[1];
+                $this->controller = $override[0];
+                $this->method = $override[1];
 
-    //             $controller = $this->createController();
-    //             $returned   = $this->runController($controller);
-    //         }
+                $controller = $this->createController();
+                $returned = $this->fireController($controller);
+            }
 
-    //         unset($override);
+            unset($override);
+            $this->setResponseOutput($returned);
 
-    //         $cacheConfig = config(Cache::class);
-    //         $this->gatherOutput($cacheConfig, $returned);
+            return $this->response;
+        }
 
-    //         return $this->response;
-    //     }
-
-    //     // Display 404 Errors
-    //     $this->response->setStatusCode($e->getCode());
-
-    //     $this->outputBufferingEnd();
-
-    //     // Throws new PageNotFoundException and remove exception message on production.
-    //     throw PageNotFoundException::forPageNotFound(
-    //         (ENVIRONMENT !== 'production' || !$this->isWeb()) ? $e->getMessage() : null
-    //     );
-    // }
+        // Display 404 Errors
+        $this->response->setStatusCode($e->getCode());
+    }
 }

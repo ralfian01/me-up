@@ -40,7 +40,7 @@ class BaseREST extends Controller
     ];
 
     /**
-     * @var bool $directCall Whether the class is called via the index method or not
+     * @var bool Whether the class is called via the index method or not
      */
     protected $directCall = true;
 

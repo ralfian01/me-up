@@ -16,6 +16,7 @@ use stdClass;
  * @method static RoutePack     options(string $from, $to, ?array $options = null)
  * @method static RoutePack     group(string $name, ...$params)
  * @method static RoutePack     match(array $verbs = [], string $from = '', $to = '', ?array $options = null)
+ * @method static RoutePack     setDefault404($callable = null)
  */
 class StaticRoutePack
 {

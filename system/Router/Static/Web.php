@@ -20,4 +20,12 @@ class Web extends StaticRoutePack
             }
         );
     }
+
+    /**
+     * @param Closure|array|null|string $callable
+     */
+    public static function setDefault404($callable = null)
+    {
+        self::get('(:any)', $callable);
+    }
 }

@@ -14,8 +14,6 @@ namespace MVCME\Autoloader;
 /**
  * Allows loading non-class files in a namespaced manner.
  * Works with Helpers, Views, etc.
- *
- * @see \CodeIgniter\Autoloader\FileLocatorTest
  */
 class FileLocator
 {

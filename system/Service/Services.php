@@ -219,6 +219,7 @@ class Services
 
     /**
      * Set header CORS
+     * @return CORS
      */
     public static function CORS(?App $config = null, ?GlobalConstants $globalConstants = null, $shared = true)
     {
@@ -332,24 +333,6 @@ class Services
     //     $view ??= AppServices::renderer(null, null, false);
 
     //     return new Pager($config, $view);
-    // }
-
-    // /**
-    //  * The Renderer class is the class that actually displays a file to the user.
-    //  * The default View class within CodeIgniter is intentionally simple, but this
-    //  * service could easily be replaced by a template engine if the user needed to
-    //  * @return View
-    //  */
-    // public static function renderer(?string $viewPath = null, ?ViewConfig $config = null, bool $getShared = true)
-    // {
-    //     if ($getShared) {
-    //         return static::getSharedInstance('renderer', $viewPath, $config);
-    //     }
-
-    //     $viewPath = $viewPath ?: (new Paths())->viewDirectory;
-    //     $config ??= config(ViewConfig::class);
-
-    //     return new View($config, $viewPath, AppServices::locator(), CI_DEBUG, AppServices::logger());
     // }
 
     // /**

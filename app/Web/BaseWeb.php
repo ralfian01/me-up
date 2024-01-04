@@ -9,6 +9,18 @@ use MVCME\Response\HTTPResponseInterface;
 class BaseWeb extends Controller
 {
     /**
+     * Helpers that will be automatically loaded on class instantiation
+     * @var array
+     */
+    protected $helpers = [];
+
+    /**
+     * Helpers that will be automatically loaded on class instantiation
+     * @var string
+     */
+    protected $baseViewPath;
+
+    /**
      * Instance of the main Request object
      * @var HTTPRequestInterface|null
      */
@@ -19,13 +31,6 @@ class BaseWeb extends Controller
      * @var HTTPResponseInterface|null
      */
     protected $response;
-
-    /**
-     * An array of helpers to be loaded automatically upon class instantiation.
-     * These helpers will be available to all other controllers that extend BaseController
-     * @var array
-     */
-    protected $helpers = [];
 
     /**
      * @return void

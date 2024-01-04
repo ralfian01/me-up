@@ -63,5 +63,5 @@ class Routing extends BaseRouting
      * Example:
      *  public $default404 = 'App\Errors::show404';
      */
-    public ?string $default404 = null;
+    public ?string $default404 = 'App\Errors\Error404::show404';
 }
