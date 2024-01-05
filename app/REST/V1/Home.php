@@ -4,12 +4,6 @@ namespace App\REST\V1;
 
 class Home extends BaseRESTV1
 {
-
-    /**
-     * @var object|null Database Repository
-     */
-    private $dbRepo;
-
     public function __construct(
         ?array $payload = [],
         ?array $file = [],

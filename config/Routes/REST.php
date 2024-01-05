@@ -10,7 +10,7 @@ use App\REST\V1 as RESTV1;
  * ---------------------------------------------------
  */
 
+REST::get('/', [RESTV1\Home::class, 'index']);
+
 // Override 404 page
 REST::setDefault404([RESTPage\Errors\Error404::class, 'index']);
-
-REST::get('/', [RESTV1\Home::class, 'index']);

@@ -45,8 +45,9 @@ class HTTPRequest extends Message implements HTTPRequestInterface
 
     /**
      * Constructor
+     * @param string|null $body
      */
-    public function __construct(URI $uri, string|null $body = 'php://input')
+    public function __construct(URI $uri, $body = 'php://input')
     {
         $this->collectHeaders();
 
@@ -60,6 +61,7 @@ class HTTPRequest extends Message implements HTTPRequestInterface
         $this->uri = $uri;
         $this->path = $uri instanceof SiteURI ? $uri->getRoutePath() : $uri->getPath();
         $this->method = $this->getServer('REQUEST_METHOD') ?? 'GET';
+        $this->body = $body;
     }
 
     private function getHostFromUri(URI $uri)
@@ -175,7 +177,7 @@ class HTTPRequest extends Message implements HTTPRequestInterface
 
 
         if ($valueUpper === 'JSON')
-            return strpos($this->getHeaderLine('Content-Type'), 'application/json') != false;
+            return strpos($this->getHeaderLine('Content-Type'), 'application/json') !== false;
 
         throw new InvalidArgumentException('Unknown type: ' . $type);
     }

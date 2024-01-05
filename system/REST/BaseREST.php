@@ -11,7 +11,6 @@ use MVCME\Request\Payload;
 
 class BaseREST extends Controller
 {
-
     /**
      * Instance of the main Request object
      * @var HTTPRequestInterface|null
@@ -33,11 +32,14 @@ class BaseREST extends Controller
 
     /**
      * Set valid origin when access API to show report_id
+     * 
+     * Example:
+     * - 'localhost:9000',
+     * - 'localhost:9000/pts_api'
+     * 
+     * @var array
      */
-    protected $validOrigin = [
-        'localhost:9000',
-        'localhost:9000/pts_api'
-    ];
+    protected $validOrigin = [];
 
     /**
      * @var bool Whether the class is called via the index method or not
@@ -53,8 +55,6 @@ class BaseREST extends Controller
         parent::initController($request, $response);
 
         // Preload any models, libraries, etc, here.
-
-        // E.g.: $this->session = \Config\Services::session();
     }
 
     /**
@@ -196,7 +196,6 @@ class BaseREST extends Controller
      */
     public function getPayload()
     {
-
         // If request payload is json
         if ($this->request->is('json')) return $this->request->getJSON(true);
 
