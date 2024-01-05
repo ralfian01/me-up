@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ralfian01/mvc-me.git",
-                "reference": "7f40ba96e4b69d3918b474a85165193cec621015"
+                "reference": "7f8e3d4b8064beea51d537dae6b065962f8dabee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ralfian01/mvc-me/zipball/7f40ba96e4b69d3918b474a85165193cec621015",
-                "reference": "7f40ba96e4b69d3918b474a85165193cec621015",
+                "url": "https://api.github.com/repos/ralfian01/mvc-me/zipball/7f8e3d4b8064beea51d537dae6b065962f8dabee",
+                "reference": "7f8e3d4b8064beea51d537dae6b065962f8dabee",
                 "shasum": ""
             },
             "require": {
@@ -39,7 +39,7 @@
                 "source": "https://github.com/ralfian01/mvc-me/tree/1.0.0",
                 "issues": "https://github.com/ralfian01/mvc-me/issues"
             },
-            "time": "2024-01-05T13:05:34+00:00"
+            "time": "2024-01-05T15:28:14+00:00"
         }
     ],
     "packages-dev": [],
