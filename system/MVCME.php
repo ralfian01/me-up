@@ -9,9 +9,9 @@ use MVCME\Request\HTTPRequestInterface;
 use MVCME\Response\HTTPResponse;
 use MVCME\Response\HTTPResponseInterface;
 use MVCME\Router\Router;
+use MVCME\Exceptions\PageNotFoundException;
 use Closure;
 use Exception;
-use MVCME\Exceptions\PageNotFoundException;
 use Throwable;
 
 /**

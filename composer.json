@@ -1,15 +1,21 @@
 {
-    "name": "putsutech/mvcme",
-    "description": "MVC_ME MVC Framework",
-    "type": "project",
-    "license": "MIT",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/ralfian01/mvc-me.git"
-        }
-    ],
-    "require": {
-        "php": "^7.4 || ^8.0"
+  "name": "ralfian01/mvcme",
+  "description": "MVC_ME MVC Framework",
+  "type": "project",
+  "license": "MIT",
+  "require": {},
+  "authors": [
+    {
+      "name": "Putsutech - Ralfian",
+      "email": "ralfian096.project@gmail.com"
     }
+  ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/ralfian01/mvc-me.git"
+    }
+  ],
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }

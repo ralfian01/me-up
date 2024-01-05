@@ -26,6 +26,7 @@ class REST extends StaticRoutePack
      */
     public static function setDefault404($callable = null)
     {
-        self::get('(:any)', $callable);
+        self::match(['get', 'post', 'put', 'patch', 'delete'], '/', $callable);
+        self::match(['get', 'post', 'put', 'patch', 'delete'], '(:any)', $callable);
     }
 }

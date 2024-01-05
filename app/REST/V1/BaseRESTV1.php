@@ -5,6 +5,7 @@ namespace App\REST\V1;
 use Exception;
 use MVCME\REST\BaseREST;
 use MVCME\Request\Payload;
+use MVCME\REST\BaseDBRepoInterface;
 
 class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
 {
@@ -33,6 +34,11 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
      * @var array|object Property that contain payload data in file form
      */
     protected $file = [];
+
+    /**
+     * @var BaseDBRepoInterface Property that contain database repository class
+     */
+    protected $dbRepo = [];
 
     /**
      * Default function if client unauthorized

@@ -31,7 +31,7 @@ if (!defined('ENVIRONMENT'))
 
 
 // Location of composer autoload
-$composerAutoload = SYSTEMPATH . "../../../autoload.php";
+$composerAutoload = SYSTEMPATH . "../../autoload.php";
 
 ### Import Composer autoload
 if (file_exists($composerAutoload))
