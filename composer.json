@@ -1,17 +1,8 @@
 {
-  "name": "ralfian01/mvc-me",
-  "description": "MVC_ME MVC Framework",
-  "type": "project",
-  "license": "MIT",
   "require": {
-    "php": "^7.4 || ^8.0"
+    "php": "^7.4 || ^8.0",
+    "ralfian01/mvc-me": "1.0.0.x-dev"
   },
-  "authors": [
-    {
-      "name": "Putsutech - Ralfian",
-      "email": "ralfian096.project@gmail.com"
-    }
-  ],
   "repositories": [
     {
       "type": "vcs",

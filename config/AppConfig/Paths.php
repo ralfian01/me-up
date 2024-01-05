@@ -10,7 +10,7 @@ class Paths
     /**
      * System Directory
      */
-    public string $systemDir = __DIR__ . DIRECTORY_SEPARATOR . '../../system';
+    public string $systemDir = __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/ralfian01/mvc-me/system';
 
     /**
      * App Directory

@@ -1,0 +1,58 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "c3b74364bf2f8dbded1ff882b43ec06b",
+    "packages": [
+        {
+            "name": "ralfian01/mvc-me",
+            "version": "1.0.0.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ralfian01/mvc-me.git",
+                "reference": "1a8c1746fe9f0d3d74e34d3a0d0bce60afa95cf3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ralfian01/mvc-me/zipball/1a8c1746fe9f0d3d74e34d3a0d0bce60afa95cf3",
+                "reference": "1a8c1746fe9f0d3d74e34d3a0d0bce60afa95cf3",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 || ^8.0"
+            },
+            "default-branch": true,
+            "type": "project",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Putsutech - Ralfian",
+                    "email": "ralfian096.project@gmail.com"
+                }
+            ],
+            "description": "MVC_ME MVC Framework",
+            "support": {
+                "source": "https://github.com/ralfian01/mvc-me/tree/1.0.0",
+                "issues": "https://github.com/ralfian01/mvc-me/issues"
+            },
+            "time": "2024-01-05T09:58:11+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "ralfian01/mvc-me": 20
+    },
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": {
+        "php": "^7.4 || ^8.0"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
+}
