@@ -261,6 +261,6 @@ class App
         if (isset($_ENV['ENVIRONMENT'])) $this->environment = $_ENV['ENVIRONMENT'];
         if (isset($_ENV['app']['port'])) $this->port = $_ENV['app']['port'];
         if (isset($_ENV['app']['hostname'])) $this->hostname = $_ENV['app']['hostname'];
-        if (isset($_ENV['app']['secureRequest'])) $this->secureRequest = $_ENV['app']['secureRequest'];
+        if (isset($_ENV['app']['secureRequest'])) $this->secureRequest = filter_var($_ENV['app']['secureRequest'], FILTER_VALIDATE_BOOLEAN);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace MVCME\REST;
 
+use AppConfig\App;
 use AppConfig\REST;
 use MVCME\Controller;
 use MVCME\Request\HTTPRequestInterface;
@@ -325,21 +326,19 @@ class BaseREST extends Controller
      */
     private function initializeValidOrigin()
     {
+        $config = new App();
+        $scheme = $config->secureRequest ? 'https' : 'http';
+
         foreach ($this->validOrigin as $key => $origin) {
 
             if ($origin == '.') {
                 $url = Services::normalizeURI('/_');
-                $this->validOrigin[$key] = rtrim($url, '/_');
-                continue;
-            }
-
-            if (preg_match('/^(https?:\/\/[A-Za-z0-9_-]+)/i', $origin)) {
-                $this->validOrigin[$key] = $origin;
+                $this->validOrigin[$key] = "{$scheme}://" . rtrim($url, '/_') . '/';
                 continue;
             }
 
             $url = Services::normalizeURI($origin);
-            $this->validOrigin[$key] = $url;
+            $this->validOrigin[$key] = "{$scheme}://" . rtrim($url, '/') . '/';
         }
     }
 }
