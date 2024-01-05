@@ -2,10 +2,11 @@
 
 namespace MVCME\Database;
 
-use BadMethodCallException;
 use Closure;
-use Exception;
+use BadMethodCallException;
 use InvalidArgumentException;
+use MVCME\Database\Exceptions\DatabaseException;
+use MVCME\Database\Exceptions\DataException;
 
 /**
  * Class DBBuilder
@@ -1290,7 +1291,7 @@ class DBBuilder
     {
         if (empty($this->QBSet)) {
             if ($this->db->DBDebug) {
-                throw new Exception(trim($renderMethod, '_') . '() has no data.');
+                throw new DatabaseException(trim($renderMethod, '_') . '() has no data.');
             }
 
             return false;
@@ -1313,7 +1314,7 @@ class DBBuilder
             $sql = $this->{$renderMethod}($table, $this->QBKeys, $QBSet);
 
             if ($sql === '') {
-                return false; // @codeCoverageIgnore
+                return false;
             }
 
             if ($this->testMode) {
@@ -1341,7 +1342,7 @@ class DBBuilder
     {
         if (empty($set)) {
             if ($this->db->DBDebug) {
-                throw new Exception('setData() has no data.');
+                throw DataException::emptyDataset('has no data.');
             }
 
             return null;
@@ -1452,7 +1453,7 @@ class DBBuilder
             $sql = $this->_upsertBatch($this->QBFrom[0], $this->QBKeys, []);
 
             if ($sql === '') {
-                return false; // @codeCoverageIgnore
+                return false;
             }
 
             if ($this->testMode === false) {
@@ -1672,7 +1673,7 @@ class DBBuilder
             $sql = $this->_insertBatch($this->QBFrom[0], $this->QBKeys, []);
 
             if ($sql === '') {
-                return false; // @codeCoverageIgnore
+                return false;
             }
 
             if ($this->testMode === false) {
@@ -1810,7 +1811,7 @@ class DBBuilder
     {
         if (empty($this->QBSet)) {
             if ($this->db->DBDebug) {
-                throw new Exception('You must use the "set" method to insert an entry.');
+                throw new DatabaseException('You must use the "set" method to insert an entry.');
             }
 
             return false;
@@ -1841,7 +1842,7 @@ class DBBuilder
 
         if (empty($this->QBSet)) {
             if ($this->db->DBDebug) {
-                throw new Exception('You must use the "set" method to update an entry.');
+                throw new DatabaseException('You must use the "set" method to update an entry.');
             }
 
             return false;
@@ -1917,7 +1918,7 @@ class DBBuilder
 
         if (!empty($limit)) {
             if (!$this->canLimitWhereUpdates) {
-                throw new Exception('This driver does not allow LIMITs on UPDATE queries using WHERE.');
+                throw new DatabaseException('This driver does not allow LIMITs on UPDATE queries using WHERE.');
             }
 
             $this->limit($limit);
@@ -1972,10 +1973,10 @@ class DBBuilder
     {
         if (empty($this->QBSet)) {
             if ($this->db->DBDebug) {
-                throw new Exception('You must use the "set" method to update an entry.');
+                throw new DatabaseException('You must use the "set" method to update an entry.');
             }
 
-            return false; // @codeCoverageIgnore
+            return false;
         }
 
         return true;
@@ -2031,10 +2032,10 @@ class DBBuilder
 
             if ($constraints === []) {
                 if ($this->db->DBDebug) {
-                    throw new Exception('You must specify a constraint to match on for batch updates.'); // @codeCoverageIgnore
+                    throw new DatabaseException('You must specify a constraint to match on for batch updates.');
                 }
 
-                return ''; // @codeCoverageIgnore
+                return '';
             }
 
             $updateFields = $this->QBOptions['updateFields'] ??
@@ -2182,7 +2183,7 @@ class DBBuilder
 
         if (empty($this->QBWhere)) {
             if ($this->db->DBDebug) {
-                throw new Exception('Deletes are not allowed unless they contain a "where" or "like" clause.');
+                throw new DatabaseException('Deletes are not allowed unless they contain a "where" or "like" clause.');
             }
 
             return false;
@@ -2196,7 +2197,7 @@ class DBBuilder
 
         if (!empty($this->QBLimit)) {
             if (!$this->canLimitDeletes) {
-                throw new Exception('SQLite3 does not allow LIMITs on DELETE queries.');
+                throw new DatabaseException('SQLite3 does not allow LIMITs on DELETE queries.');
             }
 
             $sql = $this->_limit($sql, true);
@@ -2259,7 +2260,7 @@ class DBBuilder
 
             if ($constraints === []) {
                 if ($this->db->DBDebug) {
-                    throw new Exception('You must specify a constraint to match on for batch deletes.');
+                    throw new DatabaseException('You must specify a constraint to match on for batch deletes.');
                 }
 
                 return '';
@@ -2848,7 +2849,7 @@ class DBBuilder
         }
 
         if ($builder === $this) {
-            throw new Exception('The subquery cannot be the same object as the main query object.');
+            throw new DatabaseException('The subquery cannot be the same object as the main query object.');
         }
 
         $subquery = strtr($builder->getCompiledSelect(false), "\n", ' ');

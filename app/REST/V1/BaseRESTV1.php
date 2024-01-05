@@ -10,6 +10,13 @@ use MVCME\REST\BaseDBRepoInterface;
 class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
 {
     /**
+     * Helpers that will be automatically loaded on class instantiation
+     * @var array
+     */
+    protected $helpers = [];
+
+
+    /**
      * @var array Property that contains the authentication data
      */
     public $auth = [];
@@ -36,7 +43,7 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
     protected $file = [];
 
     /**
-     * @var BaseDBRepoInterface Property that contain database repository class
+     * @var object|BaseDBRepoInterface Property that contain database repository class
      */
     protected $dbRepo = [];
 

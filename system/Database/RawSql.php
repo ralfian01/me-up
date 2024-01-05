@@ -3,7 +3,6 @@
 namespace MVCME\Database;
 
 /**
- * @see \CodeIgniter\Database\RawSqlTest
  */
 class RawSql
 {

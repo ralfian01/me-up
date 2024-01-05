@@ -40,7 +40,7 @@ abstract class DBUtils
     /**
      * Class constructor
      */
-    public function __construct(ConnectionInterface $db)
+    public function __construct(DBConnectionInterface $db)
     {
         $this->db = $db;
     }

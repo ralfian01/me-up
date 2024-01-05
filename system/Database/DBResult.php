@@ -2,7 +2,6 @@
 
 namespace MVCME\Database;
 
-use CodeIgniter\Entity\Entity;
 use stdClass;
 
 /**
@@ -12,58 +11,48 @@ abstract class DBResult
 {
     /**
      * Connection ID
-     *
      * @var object|resource
-     * @phpstan-var TConnection
      */
     public $connID;
 
     /**
      * Result ID
-     *
      * @var false|object|resource
-     * @phpstan-var false|TResult
      */
     public $resultID;
 
     /**
      * Result Array
-     *
      * @var array[]
      */
     public $resultArray = [];
 
     /**
      * Result Object
-     *
      * @var object[]
      */
     public $resultObject = [];
 
     /**
      * Custom Result Object
-     *
      * @var array
      */
     public $customResultObject = [];
 
     /**
      * Current Row index
-     *
      * @var int
      */
     public $currentRow = 0;
 
     /**
      * The number of records in the query result
-     *
      * @var int|null
      */
     protected $numRows;
 
     /**
      * Row data
-     *
      * @var array|null
      */
     public $rowData;
@@ -83,10 +72,10 @@ abstract class DBResult
      * Retrieve the results of the query. Typically an array of
      * individual data rows, which can be either an 'array', an
      * 'object', or a custom class name.
-     *
      * @param string $type The row type. Either 'array', 'object', or a class name to use
+     * @return array
      */
-    public function getResult(string $type = 'object'): array
+    public function getResult(string $type = 'object')
     {
         if ($type === 'array') {
             return $this->getResultArray();
@@ -96,68 +85,15 @@ abstract class DBResult
             return $this->getResultObject();
         }
 
-        return $this->getCustomResultObject($type);
-    }
-
-    /**
-     * Returns the results as an array of custom objects.
-     *
-     * @phpstan-param class-string $className
-     *
-     * @return array
-     */
-    public function getCustomResultObject(string $className)
-    {
-        if (isset($this->customResultObject[$className])) {
-            return $this->customResultObject[$className];
-        }
-
-        if (!$this->isValidResultId()) {
-            return [];
-        }
-
-        // Don't fetch the result set again if we already have it
-        $_data = null;
-        if (($c = count($this->resultArray)) > 0) {
-            $_data = 'resultArray';
-        } elseif (($c = count($this->resultObject)) > 0) {
-            $_data = 'resultObject';
-        }
-
-        if ($_data !== null) {
-            for ($i = 0; $i < $c; $i++) {
-                $this->customResultObject[$className][$i] = new $className();
-
-                foreach ($this->{$_data}[$i] as $key => $value) {
-                    $this->customResultObject[$className][$i]->{$key} = $value;
-                }
-            }
-
-            return $this->customResultObject[$className];
-        }
-
-        if ($this->rowData !== null) {
-            $this->dataSeek();
-        }
-        $this->customResultObject[$className] = [];
-
-        while ($row = $this->fetchObject($className)) {
-            if (!is_subclass_of($row, Entity::class) && method_exists($row, 'syncOriginal')) {
-                $row->syncOriginal();
-            }
-
-            $this->customResultObject[$className][] = $row;
-        }
-
-        return $this->customResultObject[$className];
+        return [];
     }
 
     /**
      * Returns the results as an array of arrays.
-     *
      * If no results, an empty array is returned.
+     * @return array
      */
-    public function getResultArray(): array
+    public function getResultArray()
     {
         if (!empty($this->resultArray)) {
             return $this->resultArray;
@@ -190,14 +126,12 @@ abstract class DBResult
     }
 
     /**
-     * Returns the results as an array of objects.
-     *
-     * If no results, an empty array is returned.
-     *
-     * @return array<int, stdClass>
-     * @phpstan-return list<stdClass>
+     * Returns the results as an array of objects. 
+     * If no results, an empty array is returned. 
+     * @return array<int, stdClass> 
+     * @return array
      */
-    public function getResultObject(): array
+    public function getResultObject()
     {
         if (!empty($this->resultObject)) {
             return $this->resultObject;
@@ -222,28 +156,15 @@ abstract class DBResult
             $this->dataSeek();
         }
 
-        while ($row = $this->fetchObject()) {
-            if (!is_subclass_of($row, Entity::class) && method_exists($row, 'syncOriginal')) {
-                $row->syncOriginal();
-            }
-
-            $this->resultObject[] = $row;
-        }
-
         return $this->resultObject;
     }
 
     /**
-     * Wrapper object to return a row as either an array, an object, or
-     * a custom class.
-     *
+     * Wrapper object to return a row as either an array, an object, or a custom class.
      * If row doesn't exist, returns null.
-     *
-     * @param int    $n    The index of the results to return
+     * @param int $n The index of the results to return
      * @param string $type The type of result object. 'array', 'object' or class name.
-     *
      * @return array|object|stdClass|null
-     * @phpstan-return ($type is 'object' ? stdClass|null : ($type is 'array' ? array|null : object|null))
      */
     public function getRow($n = 0, string $type = 'object')
     {
@@ -269,38 +190,13 @@ abstract class DBResult
             return $this->getRowArray($n);
         }
 
-        return $this->getCustomRowObject($n, $type);
+        return null;
     }
 
-    /**
-     * Returns a row as a custom class instance.
-     *
-     * If row doesn't exists, returns null.
-     *
-     * @return array|null
-     */
-    public function getCustomRowObject(int $n, string $className)
-    {
-        if (!isset($this->customResultObject[$className])) {
-            $this->getCustomResultObject($className);
-        }
-
-        if (empty($this->customResultObject[$className])) {
-            return null;
-        }
-
-        if ($n !== $this->currentRow && isset($this->customResultObject[$className][$n])) {
-            $this->currentRow = $n;
-        }
-
-        return $this->customResultObject[$className][$this->currentRow];
-    }
 
     /**
-     * Returns a single row from the results as an array.
-     *
-     * If row doesn't exist, returns null.
-     *
+     * Returns a single row from the results as an array. 
+     * If row doesn't exist, returns null. 
      * @return array|null
      */
     public function getRowArray(int $n = 0)
@@ -318,10 +214,8 @@ abstract class DBResult
     }
 
     /**
-     * Returns a single row from the results as an object.
-     *
-     * If row doesn't exist, returns null.
-     *
+     * Returns a single row from the results as an object. 
+     * If row doesn't exist, returns null. 
      * @return object|stdClass|null
      */
     public function getRowObject(int $n = 0)
@@ -339,11 +233,9 @@ abstract class DBResult
     }
 
     /**
-     * Assigns an item into a particular column slot.
-     *
-     * @param array|string               $key
-     * @param array|object|stdClass|null $value
-     *
+     * Assigns an item into a particular column slot. 
+     * @param array|string $key
+     * @param array|object|stdClass|null $value 
      * @return void
      */
     public function setRow($key, $value = null)
@@ -367,8 +259,7 @@ abstract class DBResult
     }
 
     /**
-     * Returns the "first" row of the current results.
-     *
+     * Returns the "first" row of the current results. 
      * @return array|object|null
      */
     public function getFirstRow(string $type = 'object')
@@ -379,8 +270,7 @@ abstract class DBResult
     }
 
     /**
-     * Returns the "last" row of the current results.
-     *
+     * Returns the "last" row of the current results. 
      * @return array|object|null
      */
     public function getLastRow(string $type = 'object')
@@ -391,8 +281,7 @@ abstract class DBResult
     }
 
     /**
-     * Returns the "next" row of the current results.
-     *
+     * Returns the "next" row of the current results. 
      * @return array|object|null
      */
     public function getNextRow(string $type = 'object')
@@ -406,8 +295,7 @@ abstract class DBResult
     }
 
     /**
-     * Returns the "previous" row of the current results.
-     *
+     * Returns the "previous" row of the current results. 
      * @return array|object|null
      */
     public function getPreviousRow(string $type = 'object')
@@ -425,8 +313,7 @@ abstract class DBResult
     }
 
     /**
-     * Returns an unbuffered row and move the pointer to the next row.
-     *
+     * Returns an unbuffered row and move the pointer to the next row. 
      * @return array|object|null
      */
     public function getUnbufferedRow(string $type = 'object')
@@ -446,8 +333,9 @@ abstract class DBResult
      * Number of rows in the result set; checks for previous count, falls
      * back on counting resultArray or resultObject, finally fetching resultArray
      * if nothing was previously fetched
+     * @return int
      */
-    public function getNumRows(): int
+    public function getNumRows()
     {
         if (is_int($this->numRows)) {
             return $this->numRows;

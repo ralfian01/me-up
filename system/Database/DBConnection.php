@@ -6,6 +6,7 @@ use Closure;
 use stdClass;
 use Throwable;
 use Exception;
+use MVCME\Database\Exceptions\DatabaseException;
 
 /**
  * @property array      $aliasedTables
@@ -333,7 +334,7 @@ abstract class DBConnection implements DBConnectionInterface
 
             // We still don't have a connection?
             if (!$this->connID) {
-                throw new Exception(sprintf(
+                throw new DatabaseException(sprintf(
                     'Unable to connect to the database.%s%s',
                     PHP_EOL,
                     implode(PHP_EOL, $connectionErrors)
@@ -480,7 +481,7 @@ abstract class DBConnection implements DBConnectionInterface
                 }
 
                 if ($exception !== null) {
-                    throw new Exception(
+                    throw new DatabaseException(
                         $exception->getMessage(),
                         $exception->getCode(),
                         $exception
@@ -1206,14 +1207,10 @@ abstract class DBConnection implements DBConnectionInterface
             return false;
         }
 
-        $this->dataCache['table_names'] = [];
-
         $query = $this->query($sql);
 
         foreach ($query->getResultArray() as $row) {
             $table = $row['table_name'] ?? $row['TABLE_NAME'] ?? $row[array_key_first($row)];
-
-            $this->dataCache['table_names'][] = $table;
         }
 
         return $this->dataCache['table_names'];

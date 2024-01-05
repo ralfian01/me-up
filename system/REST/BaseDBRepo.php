@@ -2,9 +2,8 @@
 
 namespace MVCME\REST;
 
-class BaseDBRepo implements BaseDBRepoInterface
+abstract class BaseDBRepo
 {
-
     /**
      * @var array Payload
      */
@@ -31,47 +30,35 @@ class BaseDBRepo implements BaseDBRepoInterface
      * Function to get data from database
      * @return bool|array|object|null|string
      */
-    public function getData()
-    {
-        return null;
-    }
+    abstract public function getData();
 
     /**
      * Function to insert new data to database
      * @return bool|array|object|null|string
      */
-    public function insertData()
-    {
-        return null;
-    }
+    abstract public function insertData();
 
     /**
      * Function to update data in database
      * @return bool|array|object|null|string
      */
-    public function updateData()
-    {
-        return null;
-    }
+    abstract public function updateData();
 
     /**
      * Function to delete data from database
      * @return bool|array|object|null|string
      */
-    public function deleteData()
-    {
-        return null;
-    }
+    abstract public function deleteData();
 
 
     /**
      * Function to print detail of database exception
      * @return void
      */
-    protected function printDBException($exception)
+    protected static function printDBException($exception)
     {
         // If project not in production environment, print error detail
-        if ($_ENV['CI_ENVIRONMENT'] != 'production')
+        if ($_ENV['ENVIRONMENT'] != 'production')
             print_r($exception);
     }
 }
