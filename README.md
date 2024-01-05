@@ -1,4 +1,4 @@
-# MVC ME
+# MVC ME - CORE
 
 ## What is it?
 
