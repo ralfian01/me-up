@@ -292,7 +292,7 @@ class MVCME
      */
     protected function fireController($class)
     {
-        // This is a Web request or PHP CLI request
+        // This is a Web request
         $params = $this->router->params();
 
         return $class->{$this->method}(...$params);

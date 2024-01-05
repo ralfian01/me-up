@@ -245,7 +245,6 @@ class BaseREST extends Controller
      */
     public function getFile(string $fileName = null)
     {
-
         $contentType = $this->request->getHeaderLine('content-type');
         $requestMethod = strtoupper($this->request->getServer('REQUEST_METHOD'));
 
@@ -292,8 +291,6 @@ class BaseREST extends Controller
 
         // Compile all arguments
         $param = func_get_args();
-
-        // $err = new Error($this->response, $this->request);
 
         // If client not authenticated
         if (isset($this->request->auth)) {

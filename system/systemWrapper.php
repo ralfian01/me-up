@@ -2,6 +2,7 @@
 
 use AppConfig\Paths;
 use AppConfig\Autoload;
+use MVCME\Service\Services;
 
 // Object of path constants
 if (!isset($paths))
@@ -58,6 +59,8 @@ if (!class_exists(Autoload::class, false)) {
     require_once(SYSTEMPATH . "Config/Autoload.php");
     require_once(CONFIGPATH . "AppConfig/Autoload.php");
 }
+require_once(SYSTEMPATH . "Autoloader/Autoloader.php");
+require_once(SYSTEMPATH . "Service/Services.php");
 
 // Run Autoloader
-(new Autoload())->register();
+Services::autoloader(new Autoload)->register();

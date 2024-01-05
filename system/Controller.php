@@ -5,6 +5,7 @@ namespace MVCME;
 use MVCME\Request\HTTPRequestInterface;
 use MVCME\Response\HTTPResponseInterface;
 use MVCME\View\BaseView;
+use MVCME\Service\Services;
 
 /**
  * Class Controller
@@ -52,8 +53,8 @@ class Controller
         // if ($this->forceHTTPS > 0)
         //     $this->forceHTTPS($this->forceHTTPS);
 
-        // // Autoload helper files.
-        // helper($this->helpers);
+        // Autoload helper files.
+        $this->loadHelpers();
     }
 
 
@@ -66,6 +67,16 @@ class Controller
         $renderer = new BaseView($this->baseViewPath);
 
         return $renderer->setData($data ?? [])->render($path);
+    }
+
+    /**
+     * Load helpers
+     * @return void
+     */
+    protected function loadHelpers()
+    {
+        $loader = Services::autoloader();
+        $loader->loadHelpers($this->helpers);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace MVCME\Service;
 
+use MVCME\HTTP\CORS;
 use MVCME\Config\App;
 use MVCME\Config\Assets;
 use MVCME\Asset\Asset;
@@ -22,38 +23,29 @@ use AppConfig\Format as FormatConfig;
 use AppConfig\Routing as RoutingConfig;
 use AppConfig\Middleware as MiddlewareConfig;
 use AppConfig\Assets as AssetConfig;
+use AppConfig\Autoload as AppConfigAutoload;
 use Throwable;
 
-use CodeIgniter\Email\Email;
-use CodeIgniter\Filters\Filters;
-use CodeIgniter\HTTP\CURLRequest;
-use CodeIgniter\HTTP\UserAgent;
-use CodeIgniter\Images\Handlers\BaseHandler;
-use CodeIgniter\Pager\Pager;
+// use CodeIgniter\Email\Email;
+// use CodeIgniter\HTTP\CURLRequest;
+// use CodeIgniter\Images\Handlers\BaseHandler;
+// use CodeIgniter\Pager\Pager;
 // use CodeIgniter\Session\Handlers\Database\MySQLiHandler;
 // use CodeIgniter\Session\Handlers\Database\PostgreHandler;
 // use CodeIgniter\Session\Handlers\DatabaseHandler;
 // use CodeIgniter\Session\Session;
 
-use CodeIgniter\View\RendererInterface;
-use CodeIgniter\View\View;
-
-use Config\Database;
 use Config\Email as EmailConfig;
-use Config\Filters as FiltersConfig;
 use Config\Images;
 use Config\Pager as PagerConfig;
-use Config\Paths;
-use Config\View as ViewConfig;
-use MVCME\HTTP\CORS;
-use MVCME\Response\RedirectResponse;
+use MVCME\Autoloader\Autoloader;
+use MVCME\Config\Autoload;
 
 /**
  * Services Configuration file
  */
 class Services
 {
-
     /**
      * Cache for instance of any services that have been requested as a "shared" instance.
      * Keys should be lowercase service names.
@@ -79,6 +71,20 @@ class Services
         }
 
         return self::$instances[$key];
+    }
+
+    /**
+     * Autoload
+     * @return Autoloader
+     */
+    public static function autoloader(?Autoload $autoloadConfig = null, bool $shared = true)
+    {
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__, $autoloadConfig);
+
+        return new Autoloader(
+            $autoloadConfig ?? new AppConfigAutoload
+        );
     }
 
     /**
@@ -201,7 +207,6 @@ class Services
             self::response()
         );
     }
-
 
     /**
      * @return Asset
