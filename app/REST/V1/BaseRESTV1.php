@@ -5,7 +5,7 @@ namespace App\REST\V1;
 use Exception;
 use MVCME\REST\BaseREST;
 use MVCME\Request\Payload;
-use MVCME\REST\BaseDBRepoInterface;
+use MVCME\REST\BaseDBRepo;
 
 class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
 {
@@ -43,7 +43,7 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
     protected $file = [];
 
     /**
-     * @var object|BaseDBRepoInterface Property that contain database repository class
+     * @var object|BaseDBRepo Property that contain database repository class
      */
     protected $dbRepo = [];
 
