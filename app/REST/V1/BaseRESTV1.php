@@ -5,10 +5,17 @@ namespace App\REST\V1;
 use Exception;
 use MVCME\REST\BaseREST;
 use MVCME\Request\Payload;
-use MVCME\REST\BaseDBRepoInterface;
+use MVCME\REST\BaseDBRepo;
 
 class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
 {
+    /**
+     * Helpers that will be automatically loaded on class instantiation
+     * @var array
+     */
+    protected $helpers = [];
+
+
     /**
      * @var array Property that contains the authentication data
      */
@@ -36,7 +43,7 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
     protected $file = [];
 
     /**
-     * @var BaseDBRepoInterface Property that contain database repository class
+     * @var object|BaseDBRepo Property that contain database repository class
      */
     protected $dbRepo = [];
 
