@@ -15,6 +15,12 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
      */
     protected $helpers = [];
 
+    /**
+     * Set valid origin when access API to show report_id
+     * @var array
+     */
+    protected $validOrigin = [];
+
 
     /**
      * @var array Property that contains the authentication data
