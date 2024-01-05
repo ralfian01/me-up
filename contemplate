@@ -26,7 +26,7 @@ require_once($envFile);
 
 
 // Location of index file
-$indexFile = "public/index.php";
+$indexFile = __DIR__ . "/public/index.php";
 
 $dirTarget = explode("/", $indexFile);
 array_pop($dirTarget);
