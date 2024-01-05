@@ -3,7 +3,9 @@
   "description": "MVC_ME MVC Framework",
   "type": "project",
   "license": "MIT",
-  "require": {},
+  "require": {
+    "php": "^7.4 || ^8.0"
+  },
   "authors": [
     {
       "name": "Putsutech - Ralfian",
