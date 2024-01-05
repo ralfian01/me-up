@@ -88,6 +88,18 @@ class Services
     }
 
     /**
+     * App Config
+     * @return App
+     */
+    public static function appConfig(?App $config = null, bool $shared = true)
+    {
+        if ($shared)
+            return self::getSharedInstance(__FUNCTION__, $config);
+
+        return new AppConfig();
+    }
+
+    /**
      * The URI class provides a way to model and manipulate URIs
      * @param string|null $uri The URI string
      * @param App|null $config
@@ -100,7 +112,7 @@ class Services
 
         if ($uri === null) {
             $uriBuilder = new URIBuilder(
-                $config ?? new AppConfig,
+                $config ?? self::appConfig(),
                 self::globalConstants()
             );
 
@@ -217,7 +229,7 @@ class Services
             return static::getSharedInstance(__FUNCTION__, $config, $asset, $routes);
 
         return new Asset(
-            $config ?? new AppConfig,
+            $config ?? self::appConfig(),
             $asset ?? new AssetConfig,
             $routes ?? self::routes()
         );
@@ -233,9 +245,38 @@ class Services
             return static::getSharedInstance(__FUNCTION__, $config, $globalConstants);
 
         return new CORS(
-            $config ?? new AppConfig,
+            $config ?? self::appConfig(),
             $globalConstants ?? self::globalConstants()
         );
+    }
+
+    /**
+     * Normalize the URI with the hostname and port that have been set in the application configuration
+     * @return string
+     */
+    public static function normalizeURI(string $url, ?App $config = null)
+    {
+        $config ??= self::appConfig();
+        $hostname = $config->hostname;
+
+        if (!empty($config->port) && !in_array($config->port, $config->getIgnorePort()))
+            $hostname .= ":{$config->port}";
+
+        if (preg_match('/^(https?:\/\/[A-Za-z0-9_-]+)/i', $url)) {
+            // Format: ://<hostname> => http://hostname or https://hostname
+            return $url;
+        } elseif (preg_match('~^/[A-Za-z_-]+$~', $url)) {
+            // Format: /<segment> => hostname/segment
+            return "{$hostname}{$url}";
+        } elseif (preg_match('~^[A-Za-z_-]+\.[A-Za-z_-]+$~', $url)) {
+            // Format: <sub>.<domain> => sub.custom_domain.com
+            return $url;
+        } elseif (preg_match('~^[A-Za-z_-]+$~', $url)) {
+            // Format: <sub> => sub.hostname
+            return "{$url}.{$hostname}";
+        } else {
+            return $url;
+        }
     }
 
     /**

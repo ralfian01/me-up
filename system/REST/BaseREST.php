@@ -31,11 +31,14 @@ class BaseREST extends Controller
     protected $helpers = [];
 
     /**
-     * Set valid origin when access API to show report_id
+     * Set valid origin when access API to show $report_id
      * 
-     * Example:
-     * - 'localhost:9000',
-     * - 'localhost:9000/pts_api'
+     * How to use:
+     * - ["."] => "https://yourdomain.com"
+     * - ["sub"] => "https://sub.yourdomain.com"
+     * - ["/segment"] => "https://yourdomain.com/segment"
+     * - ["sub.domain.com"] => "https://sub.domain.com"
+     * - ["https://specific.domain.com"] => "https://specific.domain.com"
      * 
      * @var array
      */
@@ -53,6 +56,7 @@ class BaseREST extends Controller
     {
         // Do Not Edit This Line
         parent::initController($request, $response);
+        $this->initializeValidOrigin();
 
         // Preload any models, libraries, etc, here.
     }
@@ -312,6 +316,30 @@ class BaseREST extends Controller
             if (is_callable($scFunction)) return $scFunction($param);
 
             return $this->error(500);
+        }
+    }
+
+    /**
+     * Initialize Valid origins when access API to show $report_id
+     * @return void
+     */
+    private function initializeValidOrigin()
+    {
+        foreach ($this->validOrigin as $key => $origin) {
+
+            if ($origin == '.') {
+                $url = Services::normalizeURI('/_');
+                $this->validOrigin[$key] = rtrim($url, '/_');
+                continue;
+            }
+
+            if (preg_match('/^(https?:\/\/[A-Za-z0-9_-]+)/i', $origin)) {
+                $this->validOrigin[$key] = $origin;
+                continue;
+            }
+
+            $url = Services::normalizeURI($origin);
+            $this->validOrigin[$key] = $url;
         }
     }
 }

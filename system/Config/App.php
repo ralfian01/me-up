@@ -153,6 +153,17 @@ class App
         80, 443
     ];
 
+
+    /**
+     * Get ignored ports
+     * @return array
+     */
+    public function getIgnorePort()
+    {
+        return $this->ignorePort;
+    }
+
+
     /**
      * Initialize app props
      * @return void
@@ -182,7 +193,7 @@ class App
 
             if ($hostname == '.') {
                 $url = $this->normalizeURI($this->baseURL);
-                array_push($this->allowedURLs, $this->baseURL);
+                array_push($this->allowedURLs, $url);
                 continue;
             }
 
