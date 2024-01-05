@@ -2,7 +2,7 @@
 
 namespace MVCME\REST;
 
-abstract class BaseDBRepo
+class BaseDBRepo
 {
     /**
      * @var array Payload
