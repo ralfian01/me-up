@@ -26,30 +26,6 @@ abstract class BaseDBRepo
         $this->auth = $auth;
     }
 
-    /**
-     * Function to get data from database
-     * @return bool|array|object|null|string
-     */
-    abstract public function getData();
-
-    /**
-     * Function to insert new data to database
-     * @return bool|array|object|null|string
-     */
-    abstract public function insertData();
-
-    /**
-     * Function to update data in database
-     * @return bool|array|object|null|string
-     */
-    abstract public function updateData();
-
-    /**
-     * Function to delete data from database
-     * @return bool|array|object|null|string
-     */
-    abstract public function deleteData();
-
 
     /**
      * Function to print detail of database exception
