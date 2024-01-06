@@ -89,10 +89,10 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
         // Collect authentication data
         $this->auth = $this->request->auth->data ?? [];
 
-        if (isset($this->auth['authority'])) {
+        if (isset($this->auth['privilege'])) {
 
-            // // Check account authority
-            if (!$this->checkPrivilege($this->auth['authority']))
+            // // Check account privilege
+            if (!$this->checkPrivilege($this->auth['privilege']))
                 return $this->__unauthorizedScheme();
         }
 

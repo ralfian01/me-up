@@ -44,7 +44,7 @@ if (!defined('APP_NAMESPACE'))
     require(CONFIGPATH . "AppConfig/Constants.php");
 
 // Temporary
-// require_once(SYSTEMPATH . "Common.php");
+require_once(SYSTEMPATH . "Common.php");
 
 
 /*
@@ -64,3 +64,7 @@ require_once(SYSTEMPATH . "Service/Services.php");
 
 // Run Autoloader
 Services::autoloader(new Autoload)->register();
+
+// Load System Helpers
+$helpers = ['url'];
+Services::autoloader()->loadHelpers($helpers);

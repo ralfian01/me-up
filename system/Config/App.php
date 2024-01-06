@@ -176,11 +176,11 @@ class App
 
         // Initialize asset URI
         $assetURL = $this->normalizeURI($this->assetHostname);
-        $this->assetURL = $assetURL;
+        $this->assetURL = "{$scheme}://{$assetURL}";
 
         // Initialize API URI
         $apiURL = $this->normalizeURI($this->apiHostname);
-        $this->apiURL = $apiURL;
+        $this->apiURL = "{$scheme}://{$apiURL}";
     }
 
     /**
