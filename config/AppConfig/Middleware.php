@@ -2,9 +2,8 @@
 
 namespace AppConfig;
 
-use App\Middleware\APIKey;
 use MVCME\Config\Middleware as ConfigMiddleware;
-use App\Middleware\Auth\Basic;
+use App\Middleware\APIKey;
 
 class Middleware extends ConfigMiddleware
 {
@@ -19,8 +18,7 @@ class Middleware extends ConfigMiddleware
      * - [middleware_name => [classname1, classname2, ...]]
      */
     public array $aliases = [
-        'apikey' => APIKey::class,
-        'auth/basic' => Basic::class
+        'Auth.APIKey' => APIKey::class,
     ];
 
     /**

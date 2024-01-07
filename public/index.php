@@ -8,7 +8,7 @@
  */
 
 // Location of class Paths file
-$pathFile = "../config/AppConfig/Paths.php";
+$pathFile = __DIR__ . DIRECTORY_SEPARATOR . "../config/AppConfig/Paths.php";
 
 ### Import path configurator
 require_once($pathFile);

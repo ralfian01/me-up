@@ -4,7 +4,7 @@ namespace App\REST\V1;
 
 use Exception;
 use MVCME\REST\BaseREST;
-use MVCME\Request\Payload;
+use AppConfig\Payload;
 use MVCME\REST\BaseDBRepo;
 
 class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
@@ -77,8 +77,17 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
      */
     public function index()
     {
+        $this->directCall = false;
+
         // Collect payload in non file form and then combine it
         self::combinePayload($this->payload, $this->getPayload(), $this->payload);
+
+        // Additional payload from placeholder
+        $params = func_get_args();
+
+        if (is_array(end($params))) {
+            self::combinePayload($this->payload, end($params), $this->payload);
+        }
 
         // Collect payload in file form
         $this->file = $this->getFile();
@@ -86,20 +95,16 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
         // Collect authentication data
         $this->auth = $this->request->auth->data ?? [];
 
-        if (isset($this->auth['authority'])) {
+        if (isset($this->auth['privilege'])) {
 
-            // // Check account authority
-            if (!$this->checkPrivilege($this->auth['authority']))
+            // // Check account privilege
+            if (!$this->checkPrivilege($this->auth['privilege']))
                 return $this->__unauthorizedScheme();
         }
-
-        $this->directCall = false;
 
         if (!method_exists(self::class, 'mainActivity')) {
             throw new Exception("Method mainActivity() does not exist");
         }
-
-        $params = func_get_args();
 
         // Authorize client
         return $this->authHandler(
