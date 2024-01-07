@@ -82,10 +82,6 @@ class Asset extends StaticRoutePack
     protected function addPlaceholder($controller)
     {
         if (is_array($controller) && count($controller) >= 2) {
-            if (!strpos($controller[1], '/$')) {
-                $controller[1] .= '/$1';
-            }
-
             return $controller;
         }
 

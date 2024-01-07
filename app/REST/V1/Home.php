@@ -8,13 +8,13 @@ class Home extends BaseRESTV1
         ?array $payload = [],
         ?array $file = [],
         ?array $auth = [],
-        // ?DBRepository $dbRepo = null
+        // ?DBRepo $dbRepo = null
     ) {
 
         $this->payload = $payload;
         $this->file = $file;
         $this->auth = $auth;
-        // $this->dbRepo = $dbRepo ?? new DBRepository();
+        // $this->dbRepo = $dbRepo ?? new DBRepo();
         return $this;
     }
 
@@ -26,10 +26,9 @@ class Home extends BaseRESTV1
     /* Edit this line to set authority rules */
     protected $privilegeRules = [];
 
+
     protected function mainActivity($id = null)
     {
-        $this->payload['id'] = $id;
-
         return $this->nextValidation();
     }
 

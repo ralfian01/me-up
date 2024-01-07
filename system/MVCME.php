@@ -238,7 +238,7 @@ class MVCME
         }
 
         // Start Closure controller
-        $returned = $this->initializeController();
+        $returned = $this->startClosureController();
 
         // Closure controller has run in fireController().
         if (!is_callable($this->controller)) {
@@ -304,7 +304,7 @@ class MVCME
      * show the appropriate Page Not Found error
      * @return HTTPResponse|string|void
      */
-    protected function initializeController()
+    protected function startClosureController()
     {
         // Is it routed to a Closure?
         if (is_object($this->controller) && (get_class($this->controller) === 'Closure')) {

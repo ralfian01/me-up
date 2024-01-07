@@ -577,11 +577,8 @@ class RoutePack implements RoutePackInterface
      *    'role:admin,manager'
      *
      * has a filter of "role", with parameters of ['admin', 'manager'].
-     *
      * @param string $search routeKey
-     *
      * @return array<int, string> filter_name or filter_name:arguments like 'role:admin,manager'
-     * @phpstan-return list<string>
      */
     public function getMiddlewareForRoute(string $search, ?string $verb = null)
     {
@@ -599,10 +596,41 @@ class RoutePack implements RoutePackInterface
     }
 
     /**
+     * Checks a route (using the "from") to see if it's filtered or not.
+     */
+    public function isPlaceholderNamed(string $search, ?string $verb = null)
+    {
+        $options = $this->loadRoutesOptions($verb);
+
+        return isset($options[$search]['placeholder']);
+    }
+
+    /**
+     * Returns the placeholder that should be applied for a single route, along
+     * with any parameters it might have.
+     * @param string $search routeKey
+     * @return array
+     */
+    public function getPlaceholderForRoute(string $search, ?string $verb = null)
+    {
+        // print_r($search);
+
+        $options = $this->loadRoutesOptions($verb);
+
+        if (!array_key_exists($search, $options) || !array_key_exists('placeholder', $options[$search])) {
+            return [];
+        }
+
+        if (is_string($options[$search]['placeholder'])) {
+            return [$options[$search]['placeholder']];
+        }
+
+        return $options[$search]['placeholder'];
+    }
+
+    /**
      * Given a
-     *
      * @throws RouterException
-     *
      * @deprecated Unused. Now uses buildReverseRoute().
      */
     protected function fillRouteParams(string $from, ?array $params = null)

@@ -3,6 +3,7 @@
 namespace MVCME\Router;
 
 use MVCME\Request\HTTPRequest;
+use MVCME\Exceptions\PageNotFoundException;
 use Exception;
 use Closure;
 
@@ -67,8 +68,6 @@ class Router
      */
     protected $middlewareInfo = [];
 
-    protected ?AutoRouterInterface $autoRouter = null;
-
     /**
      * Stores a reference to the RouteCollection object.
      */
@@ -103,20 +102,12 @@ class Router
         // Checks defined routes
         if ($this->checkRoutes($uri)) {
 
-            if ($this->pack->isFiltered($this->matchedRoute[0]))
+            if ($this->pack->isFiltered($this->matchedRoute[0])) {
                 $this->middlewareInfo = $this->pack->getMiddlewareForRoute($this->matchedRoute[0]);
+            }
 
             return $this->controller;
         }
-
-        // // Still here? Then we can try to match the URI against
-        // // Controllers/directories, but the application may not
-        // // want this, like in the case of API's.
-        // if (!$this->pack->shouldAutoRoute()) {
-        //     throw new PageNotFoundException(
-        //         "Can't find a route for '{$this->pack->getHTTPVerb()}: {$uri}'."
-        //     );
-        // }
 
         return $this->controllerName();
     }
@@ -178,23 +169,9 @@ class Router
      * instance->method(...$params).
      * @return array
      */
-    public function params(): array
+    public function params()
     {
         return $this->params;
-    }
-
-    /**
-     * Returns the name of the sub-directory the controller is in,
-     * if any. Relative to APPPATH.'Controllers'
-     * @return string
-     */
-    public function directory(): string
-    {
-        if ($this->autoRouter instanceof AutoRouter) {
-            return $this->autoRouter->directory();
-        }
-
-        return '';
     }
 
     /**
@@ -223,7 +200,7 @@ class Router
      * @param string $page
      * @return $this
      */
-    public function setIndexPage($page): self
+    public function setIndexPage($page)
     {
         $this->indexPage = $page;
 
@@ -255,42 +232,6 @@ class Router
 
             // Does the RegEx match?
             if (preg_match('#^' . $routeKey . '$#u', $uri, $matches)) {
-
-                // // // Is this route supposed to redirect to another?
-                // // if ($this->pack->isRedirect($routeKey)) {
-                // //     // replacing matched route groups with references: post/([0-9]+) -> post/$1
-                // //     $redirectTo = preg_replace_callback('/(\([^\(]+\))/', static function () {
-                // //         static $i = 1;
-
-                // //         return '$' . $i++;
-                // //     }, is_array($handler) ? key($handler) : $handler);
-
-                // //     throw new RedirectException(
-                // //         preg_replace('#^' . $routeKey . '$#u', $redirectTo, $uri),
-                // //         $this->pack->getRedirectCode($routeKey)
-                // //     );
-                // // }
-                // // // Store our locale so CodeIgniter object can
-                // // // assign it to the Request.
-                // // if (strpos($matchedKey, '{locale}') !== false) {
-                // //     preg_match(
-                // //         '#^' . str_replace('{locale}', '(?<locale>[^/]+)', $matchedKey) . '$#u',
-                // //         $uri,
-                // //         $matched
-                // //     );
-
-                // //     if (
-                // //         $this->pack->shouldUseSupportedLocalesOnly()
-                // //         && !in_array($matched['locale'], config(App::class)->supportedLocales, true)
-                // //     ) {
-                // //         // Throw exception to prevent the autorouter, if enabled,
-                // //         // from trying to find a route
-                // //         throw PageNotFoundException::forLocaleNotSupported($matched['locale']);
-                // //     }
-
-                // //     $this->detectedLocale = $matched['locale'];
-                // //     unset($matched);
-                // // }
 
                 // Are we using Closures? If so, then we need
                 // to collect the params into an array
@@ -329,23 +270,13 @@ class Router
 
                 $this->setMatchedRoute($matchedKey, $handler);
 
+                $this->namedPlaceholder($matchedKey);
+
                 return true;
             }
         }
 
         return false;
-    }
-
-    /**
-     * Checks Auto Routes.
-     * Attempts to match a URI path against Controllers and directories
-     * found in APPPATH/Controllers, to find a matching route
-     * @return void
-     */
-    public function autoRoute(string $uri)
-    {
-        [$this->directory, $this->controller, $this->method, $this->params]
-            = $this->autoRouter->getRoute($uri, $this->pack->getHTTPVerb());
     }
 
     /**
@@ -406,8 +337,7 @@ class Router
 
     /**
      * Set request route.
-     * Takes an array of URI segments as input and sets the class/method
-     * to be called.
+     * Takes an array of URI segments as input and sets the class/method to be called.
      * @param array $segments URI segments
      * @return void
      */
@@ -431,6 +361,34 @@ class Router
         array_shift($segments);
 
         $this->params = $segments;
+    }
+
+    /**
+     * @return void
+     */
+    protected function namedPlaceholder(string $ruote)
+    {
+        if (!$this->pack->isPlaceholderNamed($ruote)) {
+            return;
+        }
+
+        $placeholderOptions = $this->pack->getPlaceholderForRoute($ruote);
+
+        $params = $this->params;
+
+        foreach ($placeholderOptions as $plhVal) {
+            [$target, $named] = explode(':', $plhVal);
+
+            $target = str_replace('$', '', $target);
+            $target = intval($target) - 1;
+
+            if (isset($params[$target])) {
+                $params[$named] = $params[$target];
+                unset($params[$target]);
+            }
+        }
+
+        $this->params[] = $params;
     }
 
     /**

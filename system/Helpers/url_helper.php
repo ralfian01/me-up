@@ -1,6 +1,5 @@
 <?php
 
-use AppConfig\App as AppConfigApp;
 use MVCME\Request\HTTPRequest;
 use MVCME\URI\SiteURI;
 use MVCME\URI\URI;
@@ -68,6 +67,33 @@ if (!function_exists('asset_url')) {
         return str_replace(
             $baseUrlConfig,
             $assetUrlConfig,
+            $currentURI->baseUrl($relativePath, $scheme)
+        );
+    }
+}
+
+if (!function_exists('api_url')) {
+
+    /**
+     * Returns the API URL as defined by the App config.
+     * Base URLs are trimmed site URLs without the index page.
+     * @param array|string $relativePath URI string or array of URI segments
+     * @param string|null $scheme URI scheme. E.g., http, ftp
+     * @return string
+     */
+    function api_url($relativePath = '', ?string $scheme = null)
+    {
+        $config = Services::appConfig();
+        $baseUrlConfig = $config->baseURL;
+        $apiUrlConfig = $config->apiURL;
+
+        $currentURI = Services::request()->getUri();
+
+        assert($currentURI instanceof SiteURI);
+
+        return str_replace(
+            $baseUrlConfig,
+            $apiUrlConfig,
             $currentURI->baseUrl($relativePath, $scheme)
         );
     }
