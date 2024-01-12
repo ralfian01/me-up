@@ -110,11 +110,12 @@ class BaseREST extends Controller
 
     /**
      * Function contains json template to provide error response
+     * @param array|null $detail Show error detail
+     * @param string|null $report_id Show report id when client request has valid origin
      * @return void
      */
-    public function error(int $code = 400, array $detail = [], ?string $report_id = null)
+    public function error(int $code = 400, ?array $detail = null, ?string $report_id = null)
     {
-
         $this->setErrorStatus = false;
 
         $code = intval($code);

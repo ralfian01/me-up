@@ -89,6 +89,9 @@ class BaseView
             throw new Exception("Cannot find file {$this->renderVars['file']}");
         }
 
+        // Make our view data available to the view.
+        $this->prepareTemplateData($saveData);
+
         // Save current vars
         $renderVars = $this->renderVars;
 
