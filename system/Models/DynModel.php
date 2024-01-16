@@ -342,13 +342,13 @@ class DynModel extends Model
      */
     private function doFilter(array $filter, ?array $ignore_at = [])
     {
-
         foreach ($filter as $ftKey => $ftVal) {
             // Make sure array key is available
             if (isset($this->filterData[$ftKey])) {
 
                 // Check whether filtering should be ignored or not
-                if (in_array($ftKey, $ignore_at)) continue;
+                if (in_array($ftKey, $ignore_at))
+                    continue;
 
                 // Apply filter column rules
                 $this->filterColumn($ftKey, $ftVal);
@@ -422,7 +422,6 @@ class DynModel extends Model
      */
     private function filterColumn($filterKey, $filterValue)
     {
-
         // If the column in question is in json format
         $jsonColumn = function (&$filterData) {
             $filterData[1] = str_ireplace('JSON', '', $filterData[1]);
@@ -437,8 +436,8 @@ class DynModel extends Model
 
         // Check whether the filtration is a combination of several columns
         if (
-            strpos($this->filterData[$filterKey][0], "/\b(||)\b/i") >= 1
-            || strpos($this->filterData[$filterKey][0], "/\b(&&)\b/i") >= 1
+            strpos($this->filterData[$filterKey][0], "||") !== false
+            || strpos($this->filterData[$filterKey][0], "&&") !== false
         ) {
 
             // Filter data multiple columns
@@ -460,6 +459,18 @@ class DynModel extends Model
                     $filterValue = implode("','", $filterValue);
                     return "{$match[0]} IN ('{$filterValue}')";
                 }
+
+                // When filter value contains (!=)
+                if (strpos($filterValue, '!=') !== false) {
+                    $filterValue = str_replace('!=', '', $filterValue);
+                    return "{$match[0]} != '{$filterValue}'";
+                }
+
+                // When filter value contains (IS NOT NULL)
+                if (strpos($filterValue, '!= null') !== false) {
+                    return "{$match[0]} IS NOT NULL";
+                }
+
                 return "{$match[0]} = '{$filterValue}'";
             };
 
@@ -485,10 +496,26 @@ class DynModel extends Model
             if (in_array($this->filterData[$filterKey][1], ['whereIn', 'whereNotIn', 'orWhereIn', 'orWhereNotIn']))
                 if (!is_array($filterValue)) $filterValue = [$filterValue];
 
-            $this->{$this->filterData[$filterKey][1]}(
-                $this->filterData[$filterKey][0],
-                $filterValue
-            );
+            // When filter value contains (!=)
+            if (strpos($filterValue, '!=') !== false) {
+                $filterValue = str_replace('!=', '', $filterValue);
+                $this->filterData[$filterKey][0] .= ' !=';
+            }
+
+            // When filter value contains (!= NULL)
+            if (strpos(strtolower($filterValue), '!= null') !== false) {
+                $this->filterData[$filterKey][0] .= ' IS NOT NULL';
+
+                $this->{$this->filterData[$filterKey][1]}(
+                    $this->filterData[$filterKey][0]
+                );
+            } else {
+
+                $this->{$this->filterData[$filterKey][1]}(
+                    $this->filterData[$filterKey][0],
+                    $filterValue
+                );
+            }
         }
 
         return $this;
