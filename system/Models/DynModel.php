@@ -493,28 +493,36 @@ class DynModel extends Model
             $this->filterData[$filterKey][0] = $this->completeTableColumn($this->filterData[$filterKey][0]);
 
             // Set value to array
-            if (in_array($this->filterData[$filterKey][1], ['whereIn', 'whereNotIn', 'orWhereIn', 'orWhereNotIn']))
-                if (!is_array($filterValue)) $filterValue = [$filterValue];
-
-            // When filter value contains (!=)
-            if (strpos($filterValue, '!=') !== false) {
-                $filterValue = str_replace('!=', '', $filterValue);
-                $this->filterData[$filterKey][0] .= ' !=';
-            }
-
-            // When filter value contains (!= NULL)
-            if (strpos(strtolower($filterValue), '!= null') !== false) {
-                $this->filterData[$filterKey][0] .= ' IS NOT NULL';
-
-                $this->{$this->filterData[$filterKey][1]}(
-                    $this->filterData[$filterKey][0]
-                );
-            } else {
+            if (in_array($this->filterData[$filterKey][1], ['whereIn', 'whereNotIn', 'orWhereIn', 'orWhereNotIn'])) {
+                if (!is_array($filterValue))
+                    $filterValue = [$filterValue];
 
                 $this->{$this->filterData[$filterKey][1]}(
                     $this->filterData[$filterKey][0],
                     $filterValue
                 );
+            } else {
+
+                // When filter value contains (!=)
+                if (strpos($filterValue, '!=') !== false) {
+                    $filterValue = str_replace('!=', '', $filterValue);
+                    $this->filterData[$filterKey][0] .= ' !=';
+                }
+
+                // When filter value contains (!= NULL)
+                if (strpos(strtolower($filterValue), '!= null') !== false) {
+                    $this->filterData[$filterKey][0] .= ' IS NOT NULL';
+
+                    $this->{$this->filterData[$filterKey][1]}(
+                        $this->filterData[$filterKey][0]
+                    );
+                } else {
+
+                    $this->{$this->filterData[$filterKey][1]}(
+                        $this->filterData[$filterKey][0],
+                        $filterValue
+                    );
+                }
             }
         }
 
