@@ -19,26 +19,26 @@ app.secureRequest   = false
 # DATABASE
 #--------------------------------------------------------------------
 
-database.default.hostname   = localhost
-database.default.database   = mvc_me
-database.default.username   = root
-database.default.password   = 
-database.default.driver     = MySQLi
-database.default.port       = 3306
+# database.default.hostname   = localhost
+# database.default.database   = mvc_me
+# database.default.username   = root
+# database.default.password   = 
+# database.default.driver     = MySQLi
+# database.default.port       = 3306
 
 
 #--------------------------------------------------------------------
 # MAILING
 #--------------------------------------------------------------------
 
-# smtp.default.host = 'mail.yourdomain.com'
-# smtp.default.port = 587
-# smtp.default.user = 'username@yourdomain.com'
-# smtp.default.pass = 'your_password'
-# smtp.default.crypto = 'ssl'
-# smtp.default.protocol = 'smtp'
-# smtp.default.mailtype = 'html'
-# smtp.default.auth = true
+# smtp.default.host         = 'mail.yourdomain.com'
+# smtp.default.port         = 587
+# smtp.default.user         = 'username@yourdomain.com'
+# smtp.default.pass         = 'your_password'
+# smtp.default.crypto       = 'ssl'
+# smtp.default.protocol     = 'smtp'
+# smtp.default.mailtype     = 'html'
+# smtp.default.auth         = true
 
-# smtp.defalt.sender_mail = 'username@yourdomain.com'
-# smtp.defalt.sender_name = 'Your Mail Name'
+# smtp.defalt.sender_mail   = 'username@yourdomain.com'
+# smtp.defalt.sender_name   = 'Your Mail Name'

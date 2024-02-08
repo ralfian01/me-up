@@ -418,10 +418,9 @@ class URI
      */
     public function setScheme(string $scheme)
     {
-        $uri = clone $this;
         $scheme = strtolower($scheme);
-        $uri->scheme = preg_replace('#:(//)?$#', '', $scheme);
-        return $uri;
+        $this->scheme = preg_replace('#:(//)?$#', '', $scheme);
+        return $this;
     }
 
     /**
