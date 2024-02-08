@@ -208,12 +208,10 @@ class RoutePack implements RoutePackInterface
     private function fixExtension(string $path)
     {
         $paths = explode('.', $path);
-        foreach ($paths as $pathKey => &$path) {
-            if ($pathKey >= 1)
-                $path = strtolower($path);
-        }
+        $ext = strtolower(end($paths));
+        array_pop($paths);
 
-        return implode('.', $paths);
+        return implode('.', $paths) . '.' . $ext;
     }
 
     /**

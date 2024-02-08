@@ -8,6 +8,8 @@ namespace MVCME\Models;
  */
 class DynModel extends Model
 {
+    use DynModelTrait;
+
     protected $collectedData;
 
     public function __construct()
@@ -16,39 +18,6 @@ class DynModel extends Model
 
         // Select all column by default
         $this->excludeColumn();
-    }
-
-    /*
-     * ---------------------------------------------
-     * GENERAL TOOLS
-     * ---------------------------------------------
-     */
-
-    /**
-     * Complete column with clear table name
-     * @return string
-     */
-    private function completeTableColumn($column)
-    {
-        if (count(explode('.', $column)) <= 1)
-            return "{$this->table}.{$column}";
-
-        return $column;
-    }
-
-    /**
-     * Update the usedTableRelation property
-     * @return void
-     */
-    private function updateUsedTableRelation($array)
-    {
-        foreach ($array as $key => $usage) {
-            if (isset($this->usedTableRelations[$key])) {
-                $this->usedTableRelations[$key] += $usage;
-            } else {
-                $this->usedTableRelations[$key] = $usage;
-            }
-        }
     }
 
     /*
@@ -423,14 +392,55 @@ class DynModel extends Model
     private function filterColumn($filterKey, $filterValue)
     {
         // If the column in question is in json format
-        $jsonColumn = function (&$filterData) {
-            $filterData[1] = str_ireplace('JSON', '', $filterData[1]);
+        $jsonColumn = function (&$filterData) use ($filterKey) {
+
+            // Temporary
+            if (!in_array($filterData[1], ['whereInJson', 'whereNotInJson', 'orWhereInJson', 'orWhereNotInJson'])) {
+                $filterData[1] = str_ireplace('JSON', '', $filterData[1]);
+            }
 
             $blockColumn = explode('.$.', $filterData[0]);
             $blockColumn[0] = $this->completeTableColumn($blockColumn[0]);
 
             $filterData[0] = "JSON_EXTRACT({$blockColumn[0]}, '$.{$blockColumn[1]}')";
             return $filterData;
+        };
+
+
+        // Function to add value to column
+        $addValue = function ($match) use ($filterKey, $filterValue) {
+
+            // Complete rule with clear table name
+            $match[0] = $this->completeTableColumn($match[0]);
+
+            // Set value to array
+            if (in_array(
+                $this->filterData[$filterKey][0],
+                ['whereIn', 'whereNotIn', 'orWhereIn', 'orWhereNotIn', 'whereInJson', 'whereNotInJson', 'orWhereInJson', 'orWhereNotInJson']
+            )) {
+
+                $filterValue = [$filterValue];
+
+                ### Json format
+
+
+                ### Non-json format
+                $filterValue = implode("','", $filterValue);
+                return "{$match[0]} IN ('{$filterValue}')";
+            }
+
+            // When filter value contains (!=)
+            if (strpos($filterValue, '!=') !== false) {
+                $filterValue = str_replace('!=', '', $filterValue);
+                return "{$match[0]} != '{$filterValue}'";
+            }
+
+            // When filter value contains (IS NOT NULL)
+            if (strpos($filterValue, '!= null') !== false) {
+                return "{$match[0]} IS NOT NULL";
+            }
+
+            return "{$match[0]} = '{$filterValue}'";
         };
 
 
@@ -446,35 +456,11 @@ class DynModel extends Model
             if (strpos(strtoupper($this->filterData[$filterKey][1]), "JSON") >= 1)
                 $jsonColumn($this->filterData[$filterKey]);
 
-            // Function to add value to column
-            $addValue = function ($match) use ($filterKey, $filterValue) {
-
-                // Complete rule with clear table name
-                $match[0] = $this->completeTableColumn($match[0]);
-
-                // Set value to array
-                if (in_array($this->filterData[$filterKey][0], ['whereIn', 'whereNotIn', 'orWhereIn', 'orWhereNotIn'])) {
-
-                    $filterValue = [$filterValue];
-                    $filterValue = implode("','", $filterValue);
-                    return "{$match[0]} IN ('{$filterValue}')";
-                }
-
-                // When filter value contains (!=)
-                if (strpos($filterValue, '!=') !== false) {
-                    $filterValue = str_replace('!=', '', $filterValue);
-                    return "{$match[0]} != '{$filterValue}'";
-                }
-
-                // When filter value contains (IS NOT NULL)
-                if (strpos($filterValue, '!= null') !== false) {
-                    return "{$match[0]} IS NOT NULL";
-                }
-
-                return "{$match[0]} = '{$filterValue}'";
-            };
-
-            $this->filterData[$filterKey][0] = preg_replace_callback('/([a-zA-Z_]\w*)/', fn ($cb) => $addValue($cb), $this->filterData[$filterKey][0]);
+            $this->filterData[$filterKey][0] = preg_replace_callback(
+                '/([a-zA-Z_]\w*)/',
+                fn ($cb) => $addValue($cb),
+                $this->filterData[$filterKey][0]
+            );
             $this->filterData[$filterKey][0] = str_replace('||', 'OR', $this->filterData[$filterKey][0]);
             $this->filterData[$filterKey][0] = str_replace('&&', 'AND', $this->filterData[$filterKey][0]);
 
@@ -486,14 +472,18 @@ class DynModel extends Model
             // Filter data single column
 
             // If the column in question is in json format
-            if (strpos(strtoupper($this->filterData[$filterKey][1]), "JSON") >= 1)
+            if (strpos(strtoupper($this->filterData[$filterKey][1]), "JSON") >= 1) {
                 $jsonColumn($this->filterData[$filterKey]);
+            }
 
             // Complete rule with clear table name
             $this->filterData[$filterKey][0] = $this->completeTableColumn($this->filterData[$filterKey][0]);
 
             // Set value to array
-            if (in_array($this->filterData[$filterKey][1], ['whereIn', 'whereNotIn', 'orWhereIn', 'orWhereNotIn'])) {
+            if (in_array(
+                $this->filterData[$filterKey][1],
+                ['whereIn', 'whereNotIn', 'orWhereIn', 'orWhereNotIn', 'whereInJson', 'whereNotInJson', 'orWhereInJson', 'orWhereNotInJson']
+            )) {
                 if (!is_array($filterValue))
                     $filterValue = [$filterValue];
 

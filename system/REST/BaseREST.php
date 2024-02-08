@@ -335,11 +335,13 @@ class BaseREST extends Controller
             if ($origin == '.') {
                 $url = Services::normalizeURI('/_');
                 $this->validOrigin[$key] = "{$scheme}://" . rtrim($url, '/_') . '/';
+                $this->validOrigin[] = "{$scheme}://" . rtrim($url, '/_');
                 continue;
             }
 
             $url = Services::normalizeURI($origin);
             $this->validOrigin[$key] = "{$scheme}://" . rtrim($url, '/') . '/';
+            $this->validOrigin[] = "{$scheme}://" . rtrim($url, '/');
         }
     }
 }
