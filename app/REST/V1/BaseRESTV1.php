@@ -53,6 +53,7 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
      */
     protected $dbRepo = [];
 
+
     /**
      * Default function if client unauthorized
      * @return void|string
@@ -63,7 +64,7 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
     }
 
     /**
-     * Main activity
+     * The method that starts the main activity
      * @return null
      */
     protected function mainActivity()
@@ -118,7 +119,7 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
      * Function to check payload
      * @return void
      */
-    private function payloadChecker($param)
+    private function payloadChecker($params)
     {
         return (new Payload)
             ->setValidationData(
@@ -126,9 +127,9 @@ class BaseRESTV1 extends BaseREST implements BaseRESTV1Interface
                 $this->file,
                 $this->payloadRules
             )
-            ->validationSuccess(function () use ($param) {
+            ->validationSuccess(function () use ($params) {
 
-                return $this->mainActivity(...$param);
+                return $this->mainActivity(...$params);
             })
             ->validationFail(function ($err) {
 
