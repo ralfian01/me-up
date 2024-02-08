@@ -10,3 +10,5 @@
 *.sublime-workspace
 *.sublime-project
 
+## VS Code cache files
+/.vscode
